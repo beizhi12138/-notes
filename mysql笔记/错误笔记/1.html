@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=W, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+    *{
+        margin: 0;
+        padding: 0;
+    }
+    .baocuo{
+        background-color: aqua;
+    }
+    .box{
+        width: 666px;
+    }
+    .cuowu{
+        color: brown;
+    }
+    img{
+        width: 100%;
+    }
+    </style>
+</head>
+<body>
+    <h2 class="cuowu">初始化时报错：</h2>
+    <div class="box">
+        <img src="./images/00.jpg">
+        <p>这种报错就是my.ini文件的错误，在我们去下载了8以上的mysql的版本的时候是不需要我们去自己新建且配置my.ini文件的。直接输入命令行初始化即可，初始化的命令行如下：</p>
+        <h3>解决方案：</h3>
+        <p class="baocuo">mysqld --initialize --console</p>
+    </div>
+    <h2 class="cuowu">登陆时报错：</h2>
+    <div class="box">
+        <img src="./images/01.png" alt="">
+        <p>这种错误是在我们去进行登陆mysql时见到的报错</p>
+        <h3>解决方案：</h3>
+        <p style="color:red">注：使用压缩包去进行解压安装mysql时就会常遇到以上两种报错所以安装mysql建议使用图形化界面的安装方式。</p>、
+    </div>
+    <h2>使用node.js去连接mysql时遇到的报错</h2>
+    <div class="box">
+        <img src="./images/02.png" alt="">
+        <p>这种报错就是我们在使用node.js去连接mysql时遇到的报错</p>
+        <h3>解决方案：</h3>
+        <p>重置密码即可</p>
+    </div>
+</body>
+</html>

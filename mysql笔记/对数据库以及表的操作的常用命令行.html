@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>常用的命令行</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        .mingling {
+            color: rebeccapurple;
+        }
+
+        .minglinghang {
+            color: salmon;
+        }
+
+        .big_box {
+            width: 666px;
+            margin-left: 20px;
+        }
+        .ul{
+            margin-left: 66px;
+        }
+        .zhujian{
+            color: chocolate;
+        }
+        .waijian{
+            color: darkcyan;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="big_box">
+        <ul>
+            <li>
+                <p class="mingling">use 数据库名;</p>
+                <p>管理数据库的命令输入这个命令那么接下来的所有命令都将只针对该数据库。</p>
+            </li>
+            <li>
+                <p class="mingling">SHOW DATABASES;</p>
+                <p>输入这个命令能展现出来所有的数据库。</p>
+
+            </li>
+            <li>
+                <p class="mingling">create DATABASES 要创建的数据库的名字;</p>
+                <p>输入这个命令能创建一个数据库。</p>
+            </li>
+            <li>
+                <p class="mingling">show databases like 要查询数据库的名字;</p>
+                <p>输入这个命令能查询某一个数据库。</p>
+            </li>
+            <li>
+                <p class="mingling"> DROP DATABASE 要删除数据库的名字;</p>
+                <p>输入这个命令能删除某一个数据库。</p>
+            </li>
+            <li>
+                <p class="mingling"> CREATE TABLE 要创建表的名字 (字段1的名字 字段1的类型，字短2的名字 字段2的类型,...,字段n的名字 字段n的类型);</p>
+                <p>输入这个命令能创建一个表。</p>
+            </li>
+            <li>
+                <p class="mingling"> show TABLEs;</p>
+                <p>查看数据库中所有的表</p>
+            </li>
+            <li>
+                <p class="mingling"> DESCRIBE 表名;</p>
+                <p>查看表中的所有字段以及字段类型</p>
+            </li>
+            <li>
+                <h4>修改表</h4>
+                <p class="mingling">alter table 要修改的表的名字 要做的操作以下命令可任选:</p>
+                <ul class="ul">
+                    <li>
+                        <p class="minglinghang"> add column 要添加的字段名 要添加的字段类型</p>
+                        <p>这个是用来添加字段的</p>
+                    </li>
+                    <li>
+                        <p class="minglinghang"> change column 要修改的字段名 修改后的字段名 修改后的字段的字段类型</p>
+                        <p>这个是用来修改字段的</p>
+                    </li>
+                    <li>
+                        <p class="minglinghang">rename to 新表名</p>
+                        <p>这个是用来修改数据库中表的名字</p>
+                    </li>
+                    <li>
+                            <p class="minglinghang">modify 字段名 类型</p>
+                            <p>这个是用来修改表中字段的类型</p>
+                    </li>
+                    <li>
+                            <p class="minglinghang">drop column 字段名</p>
+                            <p>这个是用来删除表中的某个字段</p>
+                    </li>
+                    <li></li>
+                </ul>
+                <p>修改表</p>
+            </li>
+            <li>
+                    <p class="mingling"> Drop table 表名;</p>
+                    <p>删除表</p>
+            </li>
+            <li>
+                <h4>主键约束：</h4>
+                <p class="mingling">primary key</p>
+                <p>这个命令是给数据库中的表中的某个字段添加主键约束，主键常用作我们获取到的数据的id。因为主键表示在数据库中的某个表里的某个字段的值不能重复且不能为null。</p>
+                <p>我们可以在创建表的时候去给表中的某个字段设置主键</p>
+                <p class="zhujian">我们在去创建表时是这样的：CREATE TABLE 要创建表的名字 (字段1的名字 字段1的类型，字短2的名字 字段2的类型,...,字段n的名字 字段n的类型);&nbsp;&nbsp;我们可以给某个字段的字段类型后边去加上设置主键的命令那么这个地段就会成为主键。</p>
+                <p>我们还可以在去创建表的时候这样设置主键</p>
+                <p class="zhujian">我们在去创建表时是这样的：CREATE TABLE 要创建表的名字 (字段1的名字 字段1的类型，字短2的名字 字段2的类型,...,字段n的名字 字段n的类型，primary key（字段名）);&nbsp;&nbsp;这样primary key（字段名）里的字段就会成为主键，括号里可以写多个字段名用逗号隔开这样就会成为设置复合主键。</p>
+                <p>我们还可以在去修改表的时候去添加一个主键</p>
+                <p class="zhujian">alter table 表名 add primary key(字段名)这样我们就给某个字段添加了主键</p>
+            </li>
+            <li>
+                <h4>外键约束：</h4>
+                <p class="mingling">constraint 外键名 foreign key (字段名) references 练接的表名 (连接表的字段)</p>
+                <p>外键约束主要用于两个表之间的连接比如有a和b两个表我们通过a表的外键去查询b表的主键然后找到我们所需要的数据</p>
+                <p>在创建表时添加外键约束</p>
+                <p class="waijian">我们在去创建表时是这样的：CREATE TABLE 要创建表的名字 (字段1的名字 字段1的类型，字短2的名字 字段2的类型,...,字段n的名字 字段n的类型,constraint 外键名 foreign key (字段名) references 练接的表名 (连接表的字段该字段必须为主键));&nbsp;&nbsp;比如当前的表名为a，连接的表名为b，那么我们就给a中的某个字段设置了外键我们可以通过外键去查询b表中的主键来查询到我们需要的数据</p>
+                <p>我们还可以在去修改表的时候去添加一个外键</p>
+                <p class="mingling">alter table 表名 add constraint 外键名 foreign key (字段名) references 练接的表名 (连接表的字段));</p>
+                <p>我们还可以在去修改表的时候去删除外键</p>
+                <p class="mingling">alter table 表名 drop foreign key 外键名;</p>
+            </li>
+            <li>
+                <h4>唯一约束：</h4>
+                <p>unique</p>
+                <p>唯一约束主要是帮助我们在去创建某个字段的时候这个字段里的数据必须都是唯一的不能有重复但是可以有空值,<span style="color:red">注:可能会对唯一约束与主键约束有些混淆,但是一个表中可以有多个唯一字段为唯一约束但是主键约束只能有一个且主键约束的字段里不能有空之唯一约束可以</span></p>
+                <p>我们可以在去创建表的时候去添加唯一约束:</p>
+                <p class="mingling">我们在去创建表时是这样的:create table 表名 (字段1的名字 字段1的类型，字短2的名字 字段2的类型,...,字段n的名字 字段n的类型 unique) &nbsp;&nbsp;像这样我们给某个字段的字段类型后加上unique就能给该字段添加上唯一约束</p>
+                <p>我们还可以在修改表时去添加唯一约束:</p>
+                <p class="mingling">alter table 表名 add constraint 唯一约束名 unique(要添加唯一约束的字段名)</p>
+                <p>删除唯一约束:</p>
+                <p class="mingling">alter table 表名 drop index 字段名</p>
+            </li>
+            <li>
+                <h4>检查约束:</h4>
+                <p>check (表达式)</p>
+                <p>检查约束主要用于检查我们的表中的某些数据满足表达式的比如id>1;</p>
+                <p>我们可以在创建表时添加检查约束</p>
+                <p class="mingling">create table 表名 (字段1 字段类型,字段2 字段类型,...,字段n 字段类型,check (对某个字段的约束比如id>1));&nbsp;&nbsp;这样我们就给叫做id的字段添加了约束这个叫做id的字段下边所有的值不能小于1</p>
+                <p>我们还可以在修改表时添加检查约束:</p>
+                <p class="mingling">alter table 表名 add constraint 检查约束名 check (表达式);</p>
+                <p>删除检查约束:</p>
+                <p class="mingling">alter table 表名 drop constraint 检查约束名</p>
+            </li>
+            <li>
+                <h4>默认值约束:</h4>
+                <p>default 默认值</p>
+                <p>默认值就是当我们再去添加数据时没有给某个字段赋值或者它的值为空那么它的值将为默认值.</p>
+                <p>我们在去创建表的时候添加默认值:</p>
+                <p class="mingling">create table 表名 (字段1 字段类型 default 默认值,字段2 字段类型,...,字段n 字段类型);&nbsp;&nbsp;像这样我们给字段1添加了默认值如果字段1的某条数据的值为空的话那么它的值就是默认值.</p>
+                <p>我们可以在去修改表的时候添加默认值:</p>
+                <p class="mingling">alter table 表名 change column 字段名 数据类型 dafalut 默认值</p>
+                <p>删除默认值约束:</p>
+                <p class="mingling">alter table 表名 change column 字段名 字段名 数据类型 default null;</p>
+            </li>
+            <li>
+                <h4>非空约束:</h4>
+                <p>not null</p>
+                <p>非空约束就是我们在去插入数据的时候如果我们给某个字段设置了非空约束那么这个字段里的数据就不能为空如果为空则会报错.</p>
+                <p>在创建表时区设置非空约束</p>
+                <p class="mingling">create table 表名 (字段1 数据类型,字段2 数据类型 not null)&nbsp;&nbsp;像这样给某个字段的苏剧类型后加上NOT NULL 那么该字段的数据就不能有空值</p>
+                <p>在修改表时设置非空约束:</p>
+                <p class="mingling">ALTER TABLE 数据表名 cHANGE COLUMN  字段名 字段名 数据类型 NOT NULL;</p>
+                <p>删除非空约束:</p>
+                <p class="mingling">ALTER TABLE 表名 CHANGE COLUMN 字段名 字段名 数据类型 NULL;</p>
+            </li>
+            <li>
+                <h4>查看表中所有的约束:</h4>
+                <p class="mingling"> show create table 表名</p>
+            </li>
+            <li>
+                <h4>查询语句:</h4>
+                <ul class="ul">
+                    <li>
+                        <p class="mingling">select * from 表名</p>
+                        <p>这条语句主要是用来查询表中所有的数据</p>
+                    </li>
+                    <li>
+                        <p class="mingling">select 字段名 from 表名 </p>
+                        <p>这条语句是用来查询某个字段</p>
+                    </li>
+                    <li>
+                        <p class="mingling">SELECT DISTINCT 字段名 FROM 表名;</p>
+                        <p>这条语句是用来查询某个字段的数据并且去除重复的数据.</p>
+                    </li>
+                    <li>
+                        <p class="mingling"> select 字段名 as 别名</p>
+                        <p>取别名是为了比如我们的某个字段的名字较长时我们可以取别名,或者某个表的名字较长时我们可以选择去取别名只要将命令的字段名替换成别名即可</p>
+                    </li>
+                    <li>
+                        <p class="mingling"> select * from 表名 limit a ,b</p>
+                        <p>这条命令主要用做去限制查询的条数,比如只查询表中a行至b行的数据,命令行中的</p>
+                    </li>
+                    <li>
+                        <p class="mingling">select * from 表名 where 限制条件</p>
+                        <p>这条语句主要用于限制查询出来的数据只显示满足限制条件的数据</p>
+                    </li>
+                </ul>
+                <h4>插入数据:</h4>
+                <ul class="ul">
+                    <li>
+                        <p class="mingling">insert into 表名 (字段1,字段2) values (数据1,数据2)</p>
+                        <p>这条语句主要用于往表中插入数据,括号里的字段1就对应数据1,字段2就对应字段2</p>
+                    </li>
+                    <li>
+                        <p class="mingling">insert into 表名 set 字段1=数据1 ,字段2=数据2</p>
+                        <p>这条语句也是用于往表中插入数据的</p>
+                    </li>
+                    <li>
+                        <p class="mingling">insert into 表名1 (字段名1,字段名2,...,字段名n) select 字段名1,字段名2,...,字段名n from 表名2;</p>
+                        <p>该语句为查询表名2中的然后插入到表名1中</p>
+                    </li>
+                </ul>
+                <h4>修改数据:</h4>
+                <ul class="ul">
+                    <li>
+                        <p class="mingling">update 表名 set 要修改的字段=新值</p>
+                        <p>这条语句是用来修改表中的某个字段的数据但是一定要结合where限制条件来进行修改否则将会把某个字段的全部数据都修改了.</p>
+                    </li>
+                </ul>
+                <h4>删除数据:</h4>
+                <ul class="ul">
+                    <li>
+                        <p class="mingling">delete from 表名 where 限制条件</p>
+                        <p>这条命令主要用于删除表中的数据一定结合限制条件去使用否则会删除表中所有的数据.</p>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+        <h3>视图:</h3>
+        <p>什么是视图?</p>
+        <p>视图简单来说就是一条select语句进行查询后的一个结果集,当我们去对视图中的数据进行修改时那么原表中的数据也会跟着修改,当我们去修改原表中的内容时视图中的内容也会跟着更改</p>
+        <ul>
+            <li>
+                <p class="mingling">create view 视图名 as select查询语句</p>
+                <p>这条语句主要用来创建视图</p>
+                <p class="mingling">create view 视图名 (字段名1,字段名2,...,字段名n) as select 字段名1,字段名2 from 表名</p>
+                <p>有时候我们会使用自己指定的字段名那么我们的视图中就会是我们自己指定的字段名然后数据还是表中的数据</p>
+            </li>
+            <li>
+                <p class="mingling">describe 视图名 </p>
+                <p>我们通过这个命令可以查询到视图</p>
+            </li>
+            <li>
+                <p class="mingling">alter view 视图名 as select语句</p>
+                <p>这个命令用来修改视图</p>
+                <p class="mingling">update 视图名 set 字段名=新值</p>
+                <p>这个命令也是用来修改视图中的命令但是也一定要结合where 限制条件去使用 否则将会修改整个数据</p>
+            </li>
+            <li>
+                <p class="mingling">drop view 视图名</p>
+                <p>使用这个命令能够进行删除视图</p>
+            </li>
+        </ul>
+        
+        <h3>存储过程:</h3>
+        <p>什么是存储过程?</p>
+        <p>上面的sql语句等都是对单个表的操作而存储过程是为了处理多条sql语句而存在的操作,使用存储过程的目的是将常用或者复杂的工作的sql语句先实现存储起来在数据库服务器中,当我们需要完成与存储过程相同的操作时只需 call存储过程 </p>
+        <ul>
+            <li>
+                <p class="mingling">delimter 结束字符</p>
+                <p>修改结束字符，因为我们的sql语句是默认以;结尾的但是当我们在去创建存储过程时我们过程体可能会包含多条sql语句如果这些sql语句都以;进行结尾那么我们的程序会默认只执行第一条sql语句，所以我们要利用上面的命令行将结束符修改，sql语句仍用;结尾。</p>
+            </li>
+            <li>
+                <p class="mingling">create procedure 存储过程名(参数 参数类型) begin sql语句 end</p>
+                <p>创建存储过程</p>
+            </li>
+            <li>
+                <p>修改存储过程，修改存储过程的内容可以先删除原存储过程，再以相同的命名创建新的存储过程。修改存储过程的名称可以通过删除原存储过程再以不同的命名创建新的存储过程。</p>
+            </li>
+            <li>
+                <p class="mingling">drop procedure 存储过程名</p>
+                <p>删除存储过程</p>
+            </li>
+        </ul>
+        <h3>触发器：</h3>
+        <p>什么是触发器?</p>
+        <p>触发器就是一种特殊的存储过程，不同的是存储过程需要call调用才能够使用，而触发器不需要，触发器有两种类型：before 和after类型，before是在激活他的语句之前启动触发器，after是在激活他的语句之后启动触发器，启动触发器的语句有三种分别是insert delete undate</p>
+        <ul>
+            <li>
+                <p class="mingling">create trigger 触发器名 触发器类型 启动触发器的是三种语句的哪个  on 表名 for each row 启动触发器时要执行的sql语句;</p>
+                <p>创建触发器</p>
+            </li>
+            <li>
+               <p class="mingling">drop TRIGGER 触发器名</p>
+               <p>删除触发器，不存在修改触发器如果要修改触发器可通过删除触发器然后再以相同的名字命名</p>
+            </li>
+            <li></li>
+        </ul>
+        <h3>索引:</h3>
+        <p>什么是索引?</p>
+        <p>索引就相当于是表的目录，我们在查找内容前可以先查看目录再去根据目录去进行对数据的查询</p>
+        <ul>
+            <li>
+                <p class="mingling">create table  表名 (字段1 数据类型,字段2 数据类型,...,字段n 数据类型,index(字段名));</p>
+                <p>这个命令用来创建一般索引</p>
+                <p class="mingling">create table 表名 (字段1 数据类型,字段2 数据类型,...,字段n 数据类型,unique index(字段名))</p>
+                <p>这个命令用来创建唯一索引</p>
+            </li>
+            <li>
+                <p class="mingling">show index from 表名</p>
+                <p>该命令用于查看表中的索引</p>
+            </li>
+            <li>
+                <p class="mingling">drop index 索引名 on index 表名</p>
+                <p>删除索引</p>
+            </li>
+        </ul>
+        <h3>用户：</h3>
+        <p>在mysql的日常管理中我们应该定义一些有权限的用户可以访问来保护数据的安全</p>
+        <ul>
+            <li>
+               <p class="mingling">create user "用户名"@"localhost" inentified by "密码"</p>
+               <p>这个命令用来创建用户</p>
+            </li>
+            <li>
+                <p class="mingling">rename user 旧用户名@"localhost" to 新用户名@"localhost"</p>
+                <p>修改用户名</p>
+            </li>
+            <li>
+               <p class="mingling">set password for "用户名"@"localhost"=password("新密码")</p>
+                 <p>修改用户密码</p>
+            </li>
+            <li>
+                <p class="mingling">drop user "用户名"@"localhost"</p>
+                <p>删除用户</p>
+            </li>
+        </ul>
+        <h3>事务：</h3>
+        <p>事务是最小的工作单位不可再分，事务只和insert ，update ，delete 语句也就是插入，修改，删除数据有关，也就是说只有这三种语句才有事务，当执行这三种语句的某一个就代表自动开启了一个事务，这三个语句执行的结束也就自动关闭了事务</p>
+        <p class="mingling">begin</p>
+        <p>这个命令表示手动开启了一个事务</p>
+        <p class="mingling">commit</p>
+        <p>这个命令表示事务的提交</p>
+        <p class="mingling">rollback</p>
+        <p>这个命令表示事务的回滚，事务的回滚表示重新回到事务的开始然后重新输入sql语句来进行事务</p>
+        <h3>数据库备份：</h3>
+        <p>数据库的备份一般是通过导出数据或者复制表文件来保持数据库的备份用来制作数据库的副本以防止数据丢失或者损坏</p>
+        <p class="mingling">
+            select * from 数据库名.表名 into outfile "要导出的路径" fields terminated by "字符用什么符号标注" lines terminated by "每行以什么进行结尾""
+        </p>
+    </div>
+</body>
+
+</html>
