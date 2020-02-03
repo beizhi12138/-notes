@@ -1,0 +1,3 @@
+        linux与windows的区别？
+           1.  linux严格区分大小写，比如文件名，命令行等linux都是严格区分大小写的
+           2.   windows能够使用的程序不能直接在linux上使用
