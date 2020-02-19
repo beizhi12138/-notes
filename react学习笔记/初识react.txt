@@ -1,0 +1,21 @@
+react发展：
+       react是由facebook团队进行开发的，它在2013年进行开源。react源码地址： https://github.com/facebook/react   react官网：https://reactjs.org/docs/getting-started.html
+react的相关资源:
+     https://github.com/enaqx/awesome-react
+react的优点:
+      虚拟DOM，高性能，组建化
+      由于Vue(Vue不兼容IE8及以下版本)和react都是使用ES5和ES6的语法对于ES5和ES6的兼容性需要了解，去避免浏览器不兼容的问题。查看兼容性网站： http://kangax.github.io/compat-table/es5
+ 
+  关于react版本：
+     如何查看所有的历史版本？
+              https://facebook.github.io/react/blog/all.html
+              https://cdnjs.com/libraries/react/
+              https://github.com/facebook/react/commits/master
+        因为我们使用的是npm去进行管理的所以我们直接使用 react -V 即可查看当前版本
+    
+    安装及使用react.js
+       跟Vue一样，我们可以使用<script src=""></script>来引入  例：
+            <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+            <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+                  //和Vue不同的是我们需要使用react组件和虚拟DOM得引入两个js文件，另外使用路由还得引入关于路由的js文件
+        也可以使用npm或者cnpm来安装使用
