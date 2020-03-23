@@ -21,7 +21,7 @@
 <img src="./img/05.png">
 
 ## 配置完成后我们要在项目根目录下创建一个index.html,然后在src文件夹下创建index.js文件（index.js文件是webpack默认的入口文件）然后我们就可以在index.js里写react代码例如：
-<img src="./img06.png">
+<img src="./img/06.png">
 
 ## 然后我们可以在终端输入webpack进行打包以及代码的转换，打包完成之后我们会在dist文件夹下看到打包完成的main.js文件，然后我们需要手动的把man.js文件手动的引入index.html里边。接下来我们可以直接打开index.html文件进行查看或者输入命令
 "webpack-dev-server --mode development --oput-public-path dist
