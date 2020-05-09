@@ -1,0 +1,2 @@
+# ReactHooks 
+  ReactHooks 是我们React的新特性，如果使用ReactHooks的话，React的版本必须是18以上的，ReactHooks取缔了我们以前写组件的class方法

@@ -32,5 +32,5 @@
    <img src="./img/39.png">
 
     接收传递的数据
-          this.propsmatch..params就是我们路由间传递过来的数据
+          this.props.match.params就是我们路由间传递过来的数据
    <img src="./img/37.png">
