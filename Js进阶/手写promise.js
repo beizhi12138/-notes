@@ -17,7 +17,9 @@ class MyPromise{
          let reject = (reason)=>{
                         //若是失败，状态也只能从pendding转变未reason
                         if(this.state == 'pendding'){
-                            this.state
+                            this.state='reason'
+                            this.reason=reason //接收失敗的原因
+                            
                         }
          }
          //因为excutor传入就执行所以立即调用
