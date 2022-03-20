@@ -1,0 +1,57 @@
+// //去重
+
+// const arr=[1,2,1,2];
+// const arrTwo=[...new Set(arr)];
+
+// //判断元素是否在集合中
+
+// const set=new Set(arr);
+// const k=set.has(1)
+// //求交集
+// const set2=new  Set([2,3]);
+// const Set3=new Set([...set2].filter(item=>set.has(item)));
+
+//add
+
+const MySet=new Set();
+MySet.add([1,3,1]);
+MySet.add([1,2]);
+MySet.add({a:1,b:2});
+MySet.add({a:1,b:2});
+MySet.add('some Text')
+MySet.add(1)
+//结合中可以添加数组，对象，字符串等
+
+//has  //has方法用法查询集合里的元素，通常用于求交集and求差集
+const texts=MySet.has("some Text")
+  //使用has方法查询，如果当前集合中有当前元素那么返回true，没有则返回false
+
+
+
+
+//delete
+ MySet.delete([1,3,1])
+
+//使用delete可以删除集合里的元素，但是只能删除字符串and数字等，不能删除数组and对象
+
+//迭代
+// for of 方法遍历集合
+//   for(let item of MySet) console.log(item);
+//    set.keys()
+    //  for(let item of MySet.keys()) console.log(item);
+// set.values() 
+        // for(let item of MySet.values()) console.log(item);
+
+// for(let [key , value] of set.entries())
+        // for(let [key,value] of MySet.entries())console.log(value);
+
+//Set和ayyay互相转换
+ //[...Set],Array.from(set)  //set转array
+ const SetTwo=[...MySet]
+ const setThree=Array.from(MySet)
+ // new Set(Array)
+  const Set2=new Set([1,3])
+ //intersetion 求交集
+  const intersetion=new Set([...MySet].filter(item =>Set2.has(item)));
+ //difference 求差集
+  const difference=new Set([...MySet].filter(item=>!Set2.has(item)))
