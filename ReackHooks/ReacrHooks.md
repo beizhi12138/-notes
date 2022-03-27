@@ -318,3 +318,38 @@ export default Index
    在原来的用class写的组件里，有一个声明周期函数 shouldComponentUpdate()  ,会在组件更新之前执行它，
    但是在ReactHooks里没有它，当我们组件更新时都会去执行useEffect,这样会影响我们的性能以及带来很多不必要的操作
    所以我们使用useMemo解决
+
+   useMemo接受两个参数，一个是数据改变时执行的函数，第二个参数是一个数组[] ,里边是要监听的数据，只有当监听的这个数据发生改变时，才执行数据改变的函数
+
+   示例代码
+
+```javaScript
+import react ,{useState,useMemo} from 'react'
+function Example(){
+    const [xiaohong,Setxiaohong]=useState('小红在待客状态');
+    const [zhiling,Setzhiling]=useState('志玲在待客状态')
+    return (
+        <div>
+            <button onClick={()=>{Setxiaohong(new Date().getTime())}}>小红</button>
+            <button onClick={()=>{Setzhiling(new Date().getTime()+'志玲正在向我们走来')}}>志玲</button>
+            <ChildComponet name={xiaohong}>{zhiling}</ChildComponet>
+        </div>
+    )
+}
+function ChildComponet({name,children}){
+    function changes(name){
+      console.log('他来了,他来了，小红向我们走来了');
+      return name+'小红向我们走来了'
+    }
+    const actionxiaohong=useMemo(()=>changes(name),[name])
+    
+    return (
+        <div>
+            <div>{actionxiaohong}</div>
+          <div>{children}</div>
+        </div>
+    )
+}
+export default Example
+
+```
