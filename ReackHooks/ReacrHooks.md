@@ -312,3 +312,9 @@ function Index(){
 }
 export default Index
 ```
+
+## UseMemo  解决reacthooks的性能问题
+ 
+   在原来的用class写的组件里，有一个声明周期函数 shouldComponentUpdate()  ,会在组件更新之前执行它，
+   但是在ReactHooks里没有它，当我们组件更新时都会去执行useEffect,这样会影响我们的性能以及带来很多不必要的操作
+   所以我们使用useMemo解决
