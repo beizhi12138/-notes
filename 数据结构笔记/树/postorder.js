@@ -6,7 +6,7 @@ const root=require('./bt');
 //    postOrder(root.right);
 //    console.log(root.val);
 // }
-//递归
+//非递归
 const postOrder=(root)=>{
     const  stack=[root];
     const outputstack=[];
