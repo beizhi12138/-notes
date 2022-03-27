@@ -67,6 +67,65 @@
       示例代码
 
 ```javaScript
+ import { formatCountdown } from 'antd/lib/statistic/utils';
+import React ,{useState,useEffect,Component} from 'react';
+import {BrowserRouter as Router,Route,Link,Routes} from 'react-router-dom'
+
+function Index(){
+    useEffect(()=>{
+        console.log('来了,老弟. ---index')
+        return ()=>{console.log('走了老弟,---index')}
+    })
+    return (
+        <div>
+            index
+        </div>
+    )
+}
+
+function List(){
+    useEffect(()=>{
+        console.log('来了,老弟. ---List')
+        //这里return的是解绑的函数
+        return ()=>{
+            console.log('老弟你走了,---list')
+        }
+    })
+    return (
+        <div>List</div>
+    )
+}
+//使用reacthooks写法
+function ExampleThree(){
+    const [count , SetCount] =useState(0);
+    useEffect(()=>{
+        //这里的函数既代表了componentDidMount  和 componentDidUpdate
+        console.log(`you count init and update ${count}`)
+        //这里的第二个参数，是一个数组，只有当这个 第二个参数里的状态有变化时，会执行组件的解绑函数
+    },[count])
+    return (
+        <div>
+            <p>you click {count} time</p>
+            <button onClick={()=>{SetCount(count+1)}}>change count</button>
+            <Router>
+                <ul>
+                    <li>
+                        <Link to='/'>首页</Link>
+                    </li>
+                    <li>
+                        <Link to='/list'>列表</Link>
+                    </li>
+                </ul>
+                <Routes>
+                <Route path='/'  element={Index()}></Route>
+                    <Route path='/list' element={List()}></Route>
+                </Routes>
+               
+            </Router>
+        </div>
+    )
+}
+```
 
 
                                                             
