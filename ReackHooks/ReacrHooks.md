@@ -353,3 +353,46 @@ function ChildComponet({name,children}){
 export default Example
 
 ```
+
+## useRef 
+
+  用来获取dom元素，也可以用来保存变量,useRef用来获取dom，先声明一个变量进行useRef函数的调用，useRef函数接受一个参数null, 然后把要这个变量绑定到要获取的dom的ref上，useRef用来保存变量就是同样声明一个变量调用useRef函数，不传参数，然后把要保存的变量保存到，useRef().current=保存的变量，实际上很少用useRef保存变量
+
+
+  示例代码
+
+  ```javaScript
+
+import react,{useRef,useState,useEffect} from 'react';
+
+function Example(){
+    const inputE1=useRef(null);
+    //使用useRef
+
+    const buttonsClick=()=>{
+        inputE1.current.value='heello'
+        console.log(inputE1)
+    }
+    const [inputText,SetText]=useState('heello');
+    const text=useRef();
+    //使用useRef保存变量
+    useEffect(()=>{
+           text.current=inputText;
+           console.log(text.current)
+    })
+ return (
+     <div>
+             {/* 绑定ref */}
+         <input ref={inputE1} type='text' />
+        <button onClick={buttonsClick}>在input上展示文字</button>
+        <br></br>
+        <br></br>
+        <input value={inputText} onChange={(e)=>{SetText(e.target.value)}}></input>
+     </div>
+ )
+}
+
+export default Example;
+
+
+  ```
