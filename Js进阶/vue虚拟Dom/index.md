@@ -67,3 +67,72 @@
 
     1.使用cnpm 安装snnabdom。
     2.在index.js里进行引入
+```javaScript
+   //index.js
+   import {h,thunk,init} from 'snabbdom';
+   //index.html
+   <div id='#app'></div>
+   <script src='./src/index.js'></script>
+```
+  h , thunk , init 是snabbdom里的三个最基本的方法
+
+    init是一个高阶函数，返回patch()
+    h返回虚拟节点，相当于vue/React里的render函数
+    thunk是一种优化策略，可以在处理不可变数据时使用
+
+ ###  简单案例
+
+```JavaScript
+  // index.js
+  import {h,init} from 'snabbdom';
+
+  // 首先初始化一个patch函数
+  //初始化patch需要调用init函数，因为init函数返回patch函数，init函数需要接收一个参数是空数组
+   const patch=init([]);
+
+   //patch 函数用来更新dom的接收两个参数
+   // 1.旧的dom节点(会转化为虚拟dom)或者虚拟dom
+   // 2.新的虚拟dom
+ // patch函数回对这两个虚拟dom进行比较，然后更新dom节点
+
+ //使用h函数创建一个dom节点,h函数接收两个参数，返回值是一个虚拟dom
+  // 1.标签名称+id或者.class  例:div#app.class名称
+  // 2.要在标签里显示的内容
+ const center=h('div#app','Hello');
+
+   //获取到页面上的dom节点进行更新
+
+   const app=document.getelementById('#app');
+ //调用patch进行更新
+  patch(app,center);
+
+
+
+
+
+
+
+
+
+  //嵌套标签
+  const patch=init([]);
+  const app=document.getelementById('#app');
+
+  //如果要使用嵌套标签，则h函数的第二个参数接受一数组，数组里的内容都会显示在父级标签里，如果是虚拟dom则进行dom渲染，如果是字符串则显示字符串
+  const newVdom=h('div#app',[
+      h('div','这是一个div'),
+      h('p','这是一个p标签'),
+      '我是app里显示的内容'
+  ])
+   patch(app,newVdom);
+
+
+
+
+   //清空页面中的dom节点
+
+   const patch=init([]);
+   const app=document.getelementById('#app');
+    //如果清空页面中的dom节点，只需要用h函数创建一个注释标签，然后使用patch函数对dom进行更新即可
+   patch(app,h('!'));
+```
