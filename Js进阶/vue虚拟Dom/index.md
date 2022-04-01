@@ -80,7 +80,7 @@
     h返回虚拟节点，相当于vue/React里的render函数
     thunk是一种优化策略，可以在处理不可变数据时使用
 
- ###  简单案例
+ ###  使用Snabbdom简单案例
 
 ```JavaScript
   // index.js
@@ -136,3 +136,27 @@
     //如果清空页面中的dom节点，只需要用h函数创建一个注释标签，然后使用patch函数对dom进行更新即可
    patch(app,h('!'));
 ```
+## 模块 
+  Snabbdom的核心库并不能处理dom的样式和事件等，所以我们需要使用模块
+    
+    6个常用的模块
+
+     1.attributes 
+       设置Dom元素的属性 使用Setattributes
+       处理Boolean类型的属性
+     2.class
+        切换类样式
+        注意:给元素设置类样式是通过sel选择器
+     3.props
+        和attributes相似设置元素的属性 element{attr} =value
+        不处理Boolead类型的属性
+     4.Style
+       设置dom的样式，支持动画
+     5.dataset
+       设置自定义属性 data-xxx=value
+     6.evevtlisteners 
+       注册和移除事件
+
+    我们还可以通过hero模块自定义模块
+
+ 使用模块
