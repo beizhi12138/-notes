@@ -159,4 +159,36 @@
 
     我们还可以通过hero模块自定义模块
 
- 使用模块
+ 使用模块示例
+
+ ```javaScript
+
+   //给Vnode添加样式和点击事件
+   import {h,init} from 'snabbdom';
+   //引入模块;
+   import {styleModule} from 'snabbdom/src/modules/style';
+   import {evevtlistenersModule} from 'snabbdom/src/modules/evevtlisteners';
+  const app=document.getelementById('#app');
+   //注册模块
+
+   const patch=init([
+       styleModule,
+       eventlistenersModules
+   ]);
+   //init函数接收一个数组，数组内的元素就是我们需要使用的模块
+
+   //使用模块
+  const Vnode=h('div#app',{
+      style:{
+          width:'100px';
+          height:'200px';
+      },
+      on:{
+          click:()=>{
+              console.log('点击我了')
+          }
+      }
+  },'我是一个div');
+//使用模块时h函数接收三个参数，第二个参数是一个对象可以在对象里添加style设置样式，在on里添加事件，第三个参数则与之前的参数一样，可以是字符串/数组
+  patch(app,Vnode);
+ ```
