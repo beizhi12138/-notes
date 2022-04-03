@@ -483,6 +483,120 @@ patch函数块执行过程+注释
     return vnode;
   };
 }
-
-
 ```
+
+### createelm 函数
+
+   因为我们在patch函数里，如果传入进来的节点不同则创建对应dom,在这个创建对应dom时调用了createelm函数，所以我们先来解析cretaeelm函数
+      
+      首先执行模块的init钩子函数
+    createElm函数答题步骤总共分为三步
+     1.判断传入的vnode是否是 ! 如果是! 则创建注释标签
+     2.如果传入的vnode不是undefined则创建真实的Dom(不渲染)
+        1.解析节点:标签名称 , id , class
+        2.有没有data且有没有命名空间,如果有命名空间一般是svg,则创建svg，如果没有命名空间则创建真实的Dom
+        3.执行模块的create函数
+        4.给标签添加class和id.
+        5.判断当前节点有没有子节点
+        6.子节点如果是文本节点则创建文本节点，并添加到当前节点中
+        7.子节点如果是vnode，则挨个创建真实Dom，并添加到当前节点中
+        8.执行用户传入的hook,如果hook中有insert则添加到队列中，等待执行
+     3.如果用户传入的是文本，则创建文本节点
+     最后返回vnode.elm 用于下一步渲染
+
+ createElm函数执行过程+源码+注释
+ ```TypeScript
+ function createElm(vnode: VNode, insertedVnodeQueue: VNodeQueue): Node {
+    let i: any;
+    let data = vnode.data;
+ 
+    if (data !== undefined) {
+         //执行用户设置的init钩子函数
+      const init = data.hook?.init;
+      if (isDef(init)) {
+        //判断data有没有数据
+        init(vnode); 
+        //如果有的话则执行钩子函数
+        data = vnode.data;
+        //假设用户在钩子函数里改变了vnode的data，所以我们要把执行完钩子函数之后的data,再赋值给data
+      }
+    }
+    const children = vnode.children; //vnode的子节点
+    const sel = vnode.sel; //vnode的选择器  例如:div#app
+    //把vnode转换成真实dom (没有渲染到页面)
+    if (sel === "!") {
+      //判断选择器是否未! ,如果是!那么我们则创建注释节点
+      if (isUndef(vnode.text)) { //判断dom有没有文本，如果有文本则将文本设置为空
+        vnode.text = "";
+      }
+      vnode.elm = api.createComment(vnode.text!);
+    } else if (sel !== undefined) {  //如果sel 不等于undefined 则创建真实Dom
+      // Parse selector
+      //解析选择器
+      const hashIdx = sel.indexOf("#");
+      const dotIdx = sel.indexOf(".", hashIdx);
+      const hash = hashIdx > 0 ? hashIdx : sel.length;
+      const dot = dotIdx > 0 ? dotIdx : sel.length;
+      const tag =
+        hashIdx !== -1 || dotIdx !== -1
+          ? sel.slice(0, Math.min(hash, dot))
+          : sel;
+          //以上五行代码都是，解析标签名称，解析id，解析class
+      const elm = (vnode.elm =
+        isDef(data) && isDef((i = data.ns))
+          ? api.createElementNS(i, tag, data)
+          : api.createElement(tag, data));
+          //判断有没有data，有没有命名空间，有命名空间一般是svg，如果不是则创建普通的真实Dom
+      if (hash < dot) elm.setAttribute("id", sel.slice(hash + 1, dot));
+      if (dotIdx > 0)
+        elm.setAttribute("class", sel.slice(dot + 1).replace(/\./g, " "));
+        //给标签，添加上id和class
+        //执行模块中的钩子函数
+      for (i = 0; i < cbs.create.length; ++i) cbs.create[i](emptyNode, vnode);
+      //判断当前节点有没有子节点
+      if (is.array(children)) {
+        for (i = 0; i < children.length; ++i) {
+          const ch = children[i];
+          if (ch != null) {
+            //如果有子节点，则挨个创建子节点，并把子节点添加到当前节点中
+            api.appendChild(elm, createElm(ch as VNode, insertedVnodeQueue));
+          }
+        }
+      } else if (is.primitive(vnode.text)) {
+        //如果没有子节点，则判断当前节点有没有text如果有text则把创建文本节点，并添加到当前节点中
+        api.appendChild(elm, api.createTextNode(vnode.text));
+      }
+      const hook = vnode.data!.hook;
+
+      //执行用户传入的hook
+      if (isDef(hook)) {
+        // 判断用户传入的hook有没有create ，如果有则执行
+        hook.create?.(emptyNode, vnode);
+        if (hook.insert) {
+          //把vnode添加到队列中，为后续执行钩子做准备
+          insertedVnodeQueue.push(vnode);
+        }
+      }
+    } else if (options?.experimental?.fragments && vnode.children) { //判断有没有子节点
+      const children = vnode.children;
+      vnode.elm = (
+        api.createDocumentFragment ?? documentFragmentIsNotSupported
+      )();
+      for (i = 0; i < cbs.create.length; ++i) cbs.create[i](emptyNode, vnode);
+      for (i = 0; i < children.length; ++i) {
+        const ch = children[i];
+        if (ch != null) {
+          api.appendChild(
+            vnode.elm,
+            createElm(ch as VNode, insertedVnodeQueue)
+          );
+        }
+      }
+    } else {
+      //如果是字符串则创建文本节点
+      vnode.elm = api.createTextNode(vnode.text!);
+    }
+    //返回创建好的真实dom
+    return vnode.elm;
+  }
+ ```
