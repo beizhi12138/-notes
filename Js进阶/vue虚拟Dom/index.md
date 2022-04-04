@@ -482,7 +482,7 @@ patch函数块执行过程+注释
 }
 ```
 
-### createelm 函数
+## createelm 函数
 
    因为我们在patch函数里，如果传入进来的节点不同则创建对应dom,在这个创建对应dom时调用了createelm函数，所以我们先来解析cretaeelm函数
       
@@ -597,3 +597,152 @@ patch函数块执行过程+注释
     return vnode.elm;
   }
  ```
+
+ ### removeVnode  && addVnode
+   在创建完真实节点之后我们需要移除老节点，所以我们需要removeVnode函数
+
+    removeVnode总共分四步
+
+    1.获取到当前节点的所有子节点
+    2.判断当前子节是否为文本节点(判断sel属性)
+    3.如果为文本节点则直接删除文本节点
+    4.不为文本节点，执行节点的destory钩子函数，同时会执行节点的子节点的destory钩子函数
+    5.创建删除的钩子函数
+    6.执行模块中的remove钩子函数
+    7.判断用户是否传入删除的回调函数，
+    8.如果传入则执行用户删除的回调函数之后，再执行删除函数(第5步创建的那个函数)，没有传入，则直接执行钩子函数
+
+ removeVnode函数+源码+注释
+
+```TypeScript
+  function removeVnodes(
+    parentElm: Node,
+    vnodes: VNode[],
+    startIdx: number,
+    endIdx: number
+  ): void {
+    for (; startIdx <= endIdx; ++startIdx) {
+      let listeners: number;
+      let rm: () => void;
+      const ch = vnodes[startIdx]; //获取到当前节点所有的子节点
+      if (ch != null) {
+        //判断当前子节点是否为空，如果为空不做任何处理
+        if (isDef(ch.sel)) {
+          //判断当前节点有没有sel属性，也就是标签名称
+
+          invokeDestroyHook(ch);
+          //执行destory钩子函数，(会执行所有子节点的钩子函数)
+          listeners = cbs.remove.length + 1; ///防止重复删除元素
+          //创建删除的回调函数
+          rm = createRmCb(ch.elm!, listeners); //返回变量listeners的值以及调用删除节点的函数，只有当listeners == 0 的时候才会去删除节点
+          for (let i = 0; i < cbs.remove.length; ++i) cbs.remove[i](ch, rm);  //执行模块中的remove钩子函数
+          const removeHook = ch?.data?.hook?.remove;
+          if (isDef(removeHook)) {
+            //执行用户传入的删除的回调函数，
+            removeHook(ch, rm);
+          } else {
+            // 如果用户没有传入，则执行删除元素的函数
+            rm();
+          }
+        } else {
+          // Text node   
+          //如果没有sel(属性)标签名称，则为文本节点则删除文本节点
+          api.removeChild(parentElm, ch.elm!);
+        }
+      }
+    }
+  }
+
+
+```
+
+## PatchVnode函数
+  在patch函数里，我们有一个判断是来进行比较新旧节点是否相同，如果不同则创建新节点，再移除老节点，所以我们用到了createElm函数和removeVnode函数。
+  
+  但是，如果节点相同，我们就需要调用patchVnode函数，来比较新旧节点的差异然后，更新Dom
+  所以我们来看以下PatchVnode函数
+
+  patchVnode函数里有大量的判断，通过text和children来判断新老节点的差异，做出了不同差异的处理
+
+PatchVnode函数有以下几个步骤
+
+    1.获取用户传入的hook,执行用户传入的prepatch函数。
+    2.将老节点的真实Dom(elm属性)，赋值给新节点的真实Dom(elm)。
+    3，执行模块的update函数，执行用户传入的update函数。
+    4.判断新节点有没有text
+      有text
+         判断老节点有子节点，且新节点也有子节点
+           如果都有 if(true)
+              判断老节点的子节点不等于新节点的子节点 if (true) 执行updateChildren函数(对比子节点的差异，更新子节点)。
+          else if (只有新节点有子节点) 
+              1. 判断老节点有没有text，有text则设置text为空
+               2.添加新节点的子节点 (addVnode函数）
+          else if (只有老节点有子节点)
+               删除老节点的子节点  (removeVnode函数)
+          else if (老节点有text)
+              设置老节点的text为空
+      没有text
+          1.判断老节点有没有子节点，如果有删除老节点的子节点
+          2.设置新的text
+    5.执行用户传入postPatch钩子函数
+
+patchVnode函数+源码+注释
+
+
+```TypeScript
+ function patchVnode(
+    oldVnode: VNode,
+    vnode: VNode,
+    insertedVnodeQueue: VNodeQueue
+  ) {
+    const hook = vnode.data?.hook;
+    hook?.prepatch?.(oldVnode, vnode);
+    //执行用户传入的prepatch钩子函数
+    const elm = (vnode.elm = oldVnode.elm)!;
+    //将老节点的真实DOm赋值给新节点的真实Dom然后在赋值给elm这个变量
+    const oldCh = oldVnode.children as VNode[];
+    //保存老节点的子节点
+    const ch = vnode.children as VNode[];
+    // 保存新节点的子节点
+    if (oldVnode === vnode) return;  //因为老节点与新节点，都是Object，所以判断内存地址是否相同如果相同说明没有变化则直接返回
+    if (vnode.data !== undefined) {
+       //执行模块update函数
+      for (let i = 0; i < cbs.update.length; ++i)
+     
+        cbs.update[i](oldVnode, vnode);
+        //执行用户传入的uodate函数
+      vnode.data.hook?.update?.(oldVnode, vnode);
+    }
+    //判断新节点有没有text
+    if (isUndef(vnode.text)) {
+      if (isDef(oldCh) && isDef(ch)) {
+        //判断老节点有子节点，且，新节点也有子节点，则调用updatechildren函数，对比子节点，更新差异
+        if (oldCh !== ch) updateChildren(elm, oldCh, ch, insertedVnodeQueue);
+      } else if (isDef(ch)) {
+        //如果只有新节点有子节点
+        if (isDef(oldVnode.text)) api.setTextContent(elm, ""); //判断老节点有没有text，如果有则设置老节点的text为空
+        addVnodes(elm, null, ch, 0, ch.length - 1, insertedVnodeQueue); //最后添加新节点，也就是新节点的子节点
+      } else if (isDef(oldCh)) {
+        //如果只有老节点有子节点
+        //则删除老节点的子节点
+        removeVnodes(elm, oldCh, 0, oldCh.length - 1);
+      } else if (isDef(oldVnode.text)) {
+        //如果老节点有text则设置老节点的text为空
+        api.setTextContent(elm, "");
+      }
+    } else if (oldVnode.text !== vnode.text) {
+      //如果没有text
+      if (isDef(oldCh)) {
+        //判断老节点有没有子节点，如果有子节点则移除老节点的子节点
+        removeVnodes(elm, oldCh, 0, oldCh.length - 1);
+      }
+      //最后更新节点的文本
+      api.setTextContent(elm, vnode.text!);
+    }
+    //执行用户传入的posyPatch函数
+    hook?.postpatch?.(oldVnode, vnode);
+  }
+```
+
+### UpdateChild函数 (diff算法的核心)
+  因为我们在patchVnode函数里，遇到了如果老节点有子节点，且新节点，也有子节点，所以我们需要对老节点的子节点和新节点的字节点做比较，并更新差异，所以我们用到了UpdateChidlren函数
