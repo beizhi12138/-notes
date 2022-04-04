@@ -33,9 +33,6 @@
   我们学习Snabbdom 因为在vue2中使用的就是Snabbdom
 ## Snabbdom
 
-
-
-
        1.首先我们需要创建一个项目，
        2.我们需要创建一个文件夹，然后npm init -y(对项目初始化)
        3.然后安装parcel(用来启动项目)，也可以使用webpack 。(parcel使用起来更方便)
