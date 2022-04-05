@@ -766,4 +766,139 @@ patchVnode函数+源码+注释
           7.移动新节点的开始节点下标，进行下一次遍历
      5.如果老节点先遍历完成，新节点没有遍历完有剩余，则把剩余的节点添加到Dom树中
      6.如果新节点先遍历完成，老节点没有遍历完有剩余，则删除多余的节点
-     
+
+UpdateChidlren函数 +源码+注释
+
+```TypeScript
+ function updateChildren(
+    parentElm: Node, //父节点
+    oldCh: VNode[], //老的子节点
+    newCh: VNode[], //新的子节点
+    insertedVnodeQueue: VNodeQueue //addVnode时要传入的队列
+  ) {
+    let oldStartIdx = 0; //遍历老节点时的开始索引
+    let newStartIdx = 0; //遍历新节点时的开始索引
+    let oldEndIdx = oldCh.length - 1; //老节点的结束索引
+    let oldStartVnode = oldCh[0]; //老节点的开始Vnode
+    let oldEndVnode = oldCh[oldEndIdx]; //老节点的结束Vnode
+    let newEndIdx = newCh.length - 1; //新节点的结束索引
+    let newStartVnode = newCh[0]; //新节点的开始Vnode
+    let newEndVnode = newCh[newEndIdx]; //新节点的结束Vnode
+    let oldKeyToIdx: KeyToIndexMap | undefined;
+    let idxInOld: number;
+    let elmToMove: VNode;
+    let before: any;
+
+    while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
+      if (oldStartVnode == null) {
+        oldStartVnode = oldCh[++oldStartIdx]; // Vnode might have been moved left
+      } else if (oldEndVnode == null) {
+        oldEndVnode = oldCh[--oldEndIdx];
+      } else if (newStartVnode == null) {
+        newStartVnode = newCh[++newStartIdx];
+      } else if (newEndVnode == null) {
+        newEndVnode = newCh[--newEndIdx];
+
+
+        //前四行判断，都是判断老节点和新节点的开始节点和结束节点是否为空，因为我们在遍历老节点和新节点时会对开始节点和结束节点重新赋值，可能会出现为空的情况，所以为了保证遍历能继续下去要重新对为空的节点进行赋值
+      } else if (sameVnode(oldStartVnode, newStartVnode)) {
+        // 判断老节点的开始节点和结束节点是否相同，如果相同则调用patchVnode的，比较差异，然后更新到dom
+        patchVnode(oldStartVnode, newStartVnode, insertedVnodeQueue);
+        //比较完之后我们开始移动新老节点的开始节点，对下一个节点进行比较
+        oldStartVnode = oldCh[++oldStartIdx];
+        newStartVnode = newCh[++newStartIdx];
+      } else if (sameVnode(oldEndVnode, newEndVnode)) {
+        //判断结束节点是否相同，如果相同则调用patchVnode进行比较差异，更新到Dom上
+        patchVnode(oldEndVnode, newEndVnode, insertedVnodeQueue);
+        //比较完之后，移动新老节点的结束节点，对下一个节点进行比较
+        oldEndVnode = oldCh[--oldEndIdx];
+        newEndVnode = newCh[--newEndIdx];
+      } else if (sameVnode(oldStartVnode, newEndVnode)) {
+        //比较老节点的开始节点和新的结束节点，如果相同，调用patchvnode进行比较差异
+        // Vnode moved right
+        patchVnode(oldStartVnode, newEndVnode, insertedVnodeQueue);
+        api.insertBefore(
+          parentElm,
+          oldStartVnode.elm!,
+          api.nextSibling(oldEndVnode.elm!)
+        ); //把老节点的的开始节点移动到老的结束节点之后、
+
+        //移动老节点的开始节点和新的结束节点进行下一次遍历
+        oldStartVnode = oldCh[++oldStartIdx];
+        newEndVnode = newCh[--newEndIdx];
+      } else if (sameVnode(oldEndVnode, newStartVnode)) {
+        //比较老节点的结束节点和新节点的开始节点，如果相同调用patchVnode比较差异
+        // Vnode moved left
+        patchVnode(oldEndVnode, newStartVnode, insertedVnodeQueue);
+        api.insertBefore(parentElm, oldEndVnode.elm!, oldStartVnode.elm!); //将老节点的结束节点移动到老节点的开始节点之前
+        //移动老节点的结束节点和新节点的开始节点进行下一次遍历
+        oldEndVnode = oldCh[--oldEndIdx];
+        newStartVnode = newCh[++newStartIdx];
+      } else {
+        //如果新旧节点的开始节点和结束节点都不相同
+        //通过新节点的开始节点，在老节点数组中找相同节点
+        //记录老节点的所有的key和index
+        if (oldKeyToIdx === undefined) {
+          //通过调用createKtyToOldIdx 函数 ，函数返回一个对象(map) ， 键:key，值:index
+          oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx);
+        }
+        idxInOld = oldKeyToIdx[newStartVnode.key as string];
+        //idxInOld这个变量是新节点的开始节点的key，在老节点中的对应节点 
+        // 对应节点可能有，也可能没有
+        if (isUndef(idxInOld)) {
+          //如果没有在老节点中找到新节点的对应节点
+          // New element
+          api.insertBefore(
+            parentElm,
+            createElm(newStartVnode, insertedVnodeQueue),
+            oldStartVnode.elm!
+          );
+          //则创建新节点的Dom，并插入到老节点的开始节点之前
+        } else {
+
+          //如果找到对应节点
+          elmToMove = oldCh[idxInOld];
+          //找到对应节点，并存储到elmToMove变量中
+          if (elmToMove.sel !== newStartVnode.sel) {
+            //判断对应节点的sel，不等于新节点的开始节点的sel，则证明该节点被修改过，
+            //创建真实的Dom并添加到老节点的开始节点之前
+            api.insertBefore(
+              parentElm,
+              createElm(newStartVnode, insertedVnodeQueue),
+              oldStartVnode.elm!
+            );
+          } else {
+            //如果对应节点的sel相同，则调用patchvnode比较两个节点的差异，并更新Dom
+            patchVnode(elmToMove, newStartVnode, insertedVnodeQueue);
+            oldCh[idxInOld] = undefined as any; 
+            //把找到的对应节点移动到老节点的开始节点之前
+            api.insertBefore(parentElm, elmToMove.elm!, oldStartVnode.elm!);
+          }
+        }
+        //移动新节点的开始节点，进行下一次遍历
+        newStartVnode = newCh[++newStartIdx];
+      }
+    }
+  
+    //如果新节点数组没有被遍历完成，说明老节点的数组先遍历完成
+    if (newStartIdx <= newEndIdx) {
+      before = newCh[newEndIdx + 1] == null ? null : newCh[newEndIdx + 1].elm;
+      //如果新节点没有被遍历完成有剩余，则剩余的即为新增的节点，把新增的节点添加到dom树中
+      addVnodes(
+        parentElm,
+        before,
+        newCh,
+        newStartIdx,
+        newEndIdx,
+        insertedVnodeQueue
+      );
+    }
+    //如果老节点没有遍历完成，但是新节点遍历完，老节点有剩余
+    if (oldStartIdx <= oldEndIdx) {
+      //则代表剩余的节点，需要删除，调用removeVnodes删除老节点
+      removeVnodes(parentElm, oldCh, oldStartIdx, oldEndIdx);
+    }
+  }
+
+
+```
