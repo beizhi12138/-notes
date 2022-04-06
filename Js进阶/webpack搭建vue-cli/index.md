@@ -192,3 +192,95 @@ module.exports = {
         cnpm install --save-dev vue-html-loader //解析template
         cnpm install --save-dev vue-loader  //解析vue文件
         cnpm install --save-dev  vue-template-compiler //把vue的内容编译出来
+
+  现在为了实现效果我们需要三个文件
+
+   main.js  App.vue  test.vue
+
+```JavaScript
+  //main.js 
+
+  import Vue from 'vue/dist/vue.esm.js';
+  import App from './App.vue'
+  new Vue({
+   el:'#app',
+   components:{App}
+   template:'<div><App></App></div>' 
+  })
+ //App.vue
+ <template>
+ <div><Test></Test></div>
+ </template>
+ import Test from './src/components/test.vue';
+ export default {
+     components:{
+         Test
+     }
+ }
+
+ //test.vue
+<template>
+ <div>{{tips}}</div>
+ </template>
+ export default {
+    data(){
+        return {
+            tips:'哈哈'
+        }
+    }
+ }
+```
+然后更改我们的webpack配置
+
+```JavaScript
+const {VueLoaderPlugin} = require('vue-loader');
+
+module.exports={
+    ...
+module{
+ rules:[
+        {test:/\.vue$/,use:'vue-loader'}
+    ]
+},
+plugins:{
+    ...,
+    new VueLoaderPlugin()
+}
+   
+}
+```
+
+此时我们就可以去写我们的vue组件了，但是为了更完美我们需要去去掉扩展名，也就是我们引入文件时需要写的.jsm.vue等等
+
+## 去掉扩展名and取别名
+ 
+  取别名是因为我们在main.js中引入vue是这样做的
+  import Vue from 'vue/dist/vue.esm.js',取了别名之后我们可以这样写import vue from 'vue'
+
+在webpack配置中这样做
+
+```JavaScript
+  resolve:{
+      extensions:['.js','.vue','.css','.json'],
+     alias:{
+         vue:'vue/dist.esm.js'
+     }
+  }
+```
+
+## 组件样式
+
+  我们肯定要给组件写样式，但是webpack却不能对css进行打包，所以我们需要使用css-loader@5.2.7,style-loader2.0.0
+
+```JavaScript
+ rules:[
+     {
+         test:/\.vue$\,lodaer:'vue-loader',
+
+     },
+     {
+         test:/\.css/,loader:['style-loader','css-loader']
+     }
+ ]
+
+```
