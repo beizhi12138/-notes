@@ -284,3 +284,29 @@ plugins:{
  ]
 
 ```
+
+
+loader是用来干什么的?
+
+ 因为webpack只能处理js的文件，所以利用loader将非js文件转换给webpack去打包，loader的执行顺序是后进先出的,loader是对源文件进行处理的。
+ 常用的loader:
+    css-loader,style-loader,scss-loader.less-loader,vue-loader,babel-loader(将es6转换为es5),file-loader(处理图片等文件)
+
+ plugin?
+   plugin并不直接操作源文件，而是监听打包过程，然后执行，plugin是在loader执行完之后执行
+
+ 常用的plugin
+   html-webpack-plugin (根据模板html，生成html自动引入css和js文件)
+   extract-text-webpack-plugin (将js文件中引用 的样式单独抽离为css文件)
+   HotModuleReplacementPlugin  热加载
+   clean-webpack-plugin 清理上一次打包的文件夹
+   optimize-css-assets-webpack-plugin 压缩css代码
+   ParallelUglifyPlugin 压缩js代码
+
+
+ 打包和加载优化
+   优化loader，设置loader搜索目录，减少loader搜索事件避免所有不必要的文件，
+   将babel编译过的文件缓存起来，
+   Tree shaking ,删除项目中未被引用的代码，
+
+   通过压缩代码的大小，实现加载优化
