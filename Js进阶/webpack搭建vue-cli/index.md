@@ -310,3 +310,10 @@ loader是用来干什么的?
    Tree shaking ,删除项目中未被引用的代码，
 
    通过压缩代码的大小，实现加载优化
+
+   purgecss-webpack-plugin 删除没有用的样式
+   preload-webpack-plugin 静态资源预加载
+   UglifyJsPlugin 压缩js
+   CompressionPlugin 优化首屏加载时间
+   ParallelUglifyPlugin 开启多个子进程优化打包时间
+   splitchanksPlugin
