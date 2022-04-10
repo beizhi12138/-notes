@@ -1,6 +1,6 @@
 # umi
  ## 简介
-   umi相当于react的路由，他给我们提供了路由，可以供页面进行切换
+   umi相当于react的路由，他给我们提供了路由，可以供页面进行切换,但是umi是需要插件化的，比如我们想在组件加载之前q请求数据，但是umi并没有提供给我们生命周期函数，所以我们需要使用umi的插件
 
  ## 路由
    umi的路由方式相当于在pages目录下写页面，然后在.umisc.ts里进行配置
@@ -125,3 +125,65 @@ export default defineConfig({
   }
 });
   ```
+
+# umi配置解析
+  ## 404  true
+    在路由中的404页面，默认是开启,可以选择关闭
+  ## alias 
+    起别名，相当于webpack的alias
+
+```JavaScript
+  //.umirc.ts
+   export default defineConfig({
+       alias:{
+           foo:'', //路径
+       }
+   })
+```
+ ## analyze (包模块分析工具)
+   
+   analyze 是一个包模块分析工具，可以利用analyze查看我们包的大小然后对我们的项目进行优化
+
+```JavaScript
+  //首先需要安装 umi-weback-bunble-analyzer 模块和cross-env模块
+    
+  //然后在pakcage.json里这样配置
+   "analyze":"cross-env ANALYZE=1 umi dev"
+
+  //然后在.umirc.ts里添加配置
+   export default defineConfig({
+     analyze:{
+    analyzerMode: 'server',
+    analyzerPort: 8888,  //端口号
+    openAnalyzer: true,
+    // generate stats file while ANALYZE_DUMP exist
+    generateStatsFile: false,
+    statsFilename: 'stats.json',
+    logLevel: 'info',
+    defaultSizes: 'parsed', // stat  // gzip
+  }
+   })
+
+   //最后 npm run alalyze ,然后打开localhost:8888就可以查看了
+```
+## copy 
+  设置要出现的打包之后出现的文件 , 比如有一张图片在src文件夹下，想让build之后dist目录下也有就使用copy配置
+
+```JavaScript
+  export default defineConfig({
+      copy:[{
+          to:'要输出到dist的路径',
+          from:'要copy文件的路径'
+      }]
+  })
+```
+## define (全局变量) 
+  通过define 设置全局变量,在开发以及打包完的代码都能访问到该全局变量
+```JavaScript
+   export default defineConfig({
+       define:{
+           Foo:'bar'
+       }
+   })
+```
+ 
