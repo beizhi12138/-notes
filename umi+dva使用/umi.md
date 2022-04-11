@@ -125,7 +125,6 @@ export default defineConfig({
   }
 });
   ```
-
 # umi配置解析
   ## 404  true
     在路由中的404页面，默认是开启,可以选择关闭
