@@ -186,4 +186,23 @@ export default defineConfig({
        }
    })
 ```
- 
+## exportStatic  (需要配合开启ssr渲染使用)
+
+```JavaScript
+  export default defineConfig({
+      exportStatic:{} 
+  }) 
+```
+## ssr 开启srr
+  在umi dev时会开启srr，umi build之后会建立一个umi.server.js，会在nodejs里使用，如果没有在nidejs里还希望有ssr的话，需要配合开启exportStatic配置
+```JavaScript
+ export default defineCofing({
+     ssr:{
+    forceInitial: false,
+    removeWindowInitialProps: false
+    devServerRender: true,
+    mode: 'string',
+    staticMarkup: false,
+     }
+ })
+```
