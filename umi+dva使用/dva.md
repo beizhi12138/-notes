@@ -101,3 +101,29 @@
  ```
 
  ## dva-cli
+
+ # dva源码解析
+  dva其实就是实现了对redux和redux-sga的封装他还内置了路由和fetch(相当于axios)，所以dva也是一个企业级别的微型框架,研究dva的源码首先我们根据package.json查看dva都引入了哪些东西
+  ## dva/package.json
+    dva里分别引入了这些东西
+
+```JavaScript
+  "@babel/runtime": "7.0.0-beta.46", //编译时的文件，编译过后使得代码的体积更小
+    "@types/isomorphic-fetch": "^0.0.34", //请求用的库
+    "@types/react-router-dom": "^4.2.7",
+    "@types/react-router-redux": "^5.0.13",
+    "dva-core": "^1.4.0", //dva源码的核心功能实现的库
+    "global": "^4.3.2",
+    "history": "^4.6.3", //borswerRouter和hashRouter
+    "invariant": "^2.2.2",//断言库
+    "isomorphic-fetch": "^2.2.1",
+    "react-redux": "5.0.7",//提供了一个高阶组件方便在各处调用store
+    "react-router-dom": "^4.1.2", //路由
+    "react-router-redux": "5.0.0-alpha.9", //reduce的中间件
+    "redux": "^3.7.2" //redux
+
+```
+然后我们来看index.js
+  
+   ## dva/src/index.js
+     index.js返回一个app方法,app挂载了dva的所有方法
