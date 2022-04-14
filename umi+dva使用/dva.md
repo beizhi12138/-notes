@@ -126,4 +126,24 @@
 然后我们来看index.js
   
    ## dva/src/index.js
-     index.js返回一个app方法,app挂载了dva的所有方法
+     index.js返回一个app方法,app挂载了dva的所有方法,app返回三个方法start,model,use,router
+
+     ```javaScript
+     //额外的plugin插件
+     app.use({})
+     //models层
+  app.model(require('./models/example').default);
+
+// 4. Router 配置路由
+app.router(require('./router').default);
+
+// 5. Start 挂载
+app.start('#root');
+
+     ```
+
+  我们先从start方法开始
+
+  ### start
+   
+    start方法接收一个参数,就是我们需要挂载的Dom，它可以是一个字符串就是dom的id或者class，也可以是一个真实的dom，start之后开始初始化modules和sage也就是初始化我们的store
