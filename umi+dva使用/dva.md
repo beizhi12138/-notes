@@ -147,3 +147,6 @@ app.start('#root');
   ### start
    
     start方法接收一个参数,就是我们需要挂载的Dom，它可以是一个字符串就是dom的id或者class，也可以是一个真实的dom，start之后开始初始化modules和sage也就是初始化我们的store
+
+ ### router
+   router方法接收的是路由
