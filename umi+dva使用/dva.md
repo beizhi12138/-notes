@@ -261,3 +261,152 @@ function render(container, store, app, router) {
 
   经过上面的源码，我们可以看到dva/src/index.js只是实现了对mode和view的绑定，真正实现了dva里的model的是dva-core所以我们接下来看dva-core的源码
    ## dva-core/src/index.js
+
+  ### create
+    dva-core导出了create方法，这个create方法就是我们整个创建model的过程，create方法接收两个参数opts 是使用者添加的控制选项，createOpts 则是初始化了 reducer 与 redux 的中间件
+    create创建了一个app并给他绑定model(用于注册model),plugin(各种插件基于dva的声明周期函数的)，start(启动app),最终create放回app
+
+```JavaScript
+  export function create(hooksAndOpts = {}, createOpts = {}) {
+  const { initialReducer, setupApp = noop } = createOpts;
+//plugin里包含了一些钩子函数
+  const plugin = new Plugin(); //所有的中间件
+  plugin.use(filterHooks(hooksAndOpts));
+ //create创建了一个app并给他绑定了model和start方法
+  const app = {
+    _models: [prefixNamespace({ ...dvaModel })],
+    _store: null,
+    _plugin: plugin,
+    use: plugin.use.bind(plugin),
+    model,
+    start,
+  };
+  return app;
+```
+  ### plugin
+
+    在create函数里创建了plugin并通过filterHooks去掉不合法的plugin,plugin里是这样做的,
+
+       1.plugin里首先定义一乐hooks函数，用于保存所有生命周期函数的名称(主要用于判断用户传进来的是否是合法的，以及给plugin这个类进行绑定)
+       2.声明一个filterhooks函数用于过滤掉用户传进来的不合法的函数
+       3.声明plugin类并进行导出，在constructor函数给plugin类的私有hooks绑定hooks数组
+       4.定义plugin的类方法用来注册中间件,也就是将用户传进来的方法push到对应的hooks数组里
+```JavaScript
+//定义hooks包含了所有声明周期函数的名字
+const hooks = [
+  'onError',
+  'onStateChange',
+  'onAction',
+  'onHmr',
+  'onReducer',
+  'onEffect',
+  'extraReducers',
+  'extraEnhancers',
+  '_handleActions',
+];
+//判断是否是hooks里有的，如果hooks没有就被视为不合法的剔除掉
+export function filterHooks(obj) {
+  return Object.keys(obj).reduce((memo, key) => {
+    if (hooks.indexOf(key) > -1) {
+      memo[key] = obj[key];
+    }
+    return memo;
+  }, {});
+}
+
+export default class Plugin {
+  constructor() {
+    this._handleActions = null;
+    this.hooks = hooks.reduce((memo, key) => {
+      memo[key] = [];
+      return memo;
+    }, {});
+  //定义每一个插件函数为数组,就是相当于
+   // this.hooks={
+      //onError=[],
+      //onStartChange=[]  
+   //}
+  }
+
+  use(plugin) {
+    //判断传进来的plugin是否是一个对象
+    invariant(
+      isPlainObject(plugin),
+      'plugin.use: plugin should be plain object'
+    );
+    const hooks = this.hooks;
+    //挨个放入数组
+    for (const key in plugin) {
+      //调用hasOwnProperty方法，是为了防止用户在的pligun里自己写一个，也就是怕用户传入进项相同名称的然后覆盖掉之前的函数，所以通过hasOwnProperty调用
+      if (Object.prototype.hasOwnProperty.call(plugin, key)) {
+        invariant(hooks[key], `plugin.use: unknown plugin property: ${key}`);
+        if (key === '_handleActions') {
+          this._handleActions = plugin[key];
+        } else if (key === 'extraEnhancers') {
+          hooks[key] = plugin[key];
+        } else {
+          hooks[key].push(plugin[key]);
+        }
+      }
+    }
+  }
+
+  apply(key, defaultHandler) {
+    const hooks = this.hooks;
+    const validApplyHooks = ['onError', 'onHmr'];
+    invariant(
+      validApplyHooks.indexOf(key) > -1,
+      `plugin.apply: hook ${key} cannot be applied`
+    );
+    const fns = hooks[key];
+
+    return (...args) => {
+      if (fns.length) {
+        for (const fn of fns) {
+          fn(...args);
+        }
+      } else if (defaultHandler) {
+        defaultHandler(...args);
+      }
+    };
+  }
+
+  get(key) {
+    const hooks = this.hooks;
+    invariant(key in hooks, `plugin.get: hook ${key} cannot be got`);
+    if (key === 'extraReducers') {
+      return getExtraReducers(hooks[key]);
+    } else if (key === 'onReducer') {
+      return getOnReducer(hooks[key]);
+    } else {
+      return hooks[key];
+    }
+  }
+}
+
+```
+  接下来我们来看model，我们是如何注册model的
+### model
+  注册model是通过model函数，model函数首先通过checkmodel来检查model是否合法
+    一个model是否合法需要以下几点
+        1.namespace: //必须传，必须为字符串，而且是唯一的
+        2.state 必须传，可以是任何数据
+        3.effect  //可传可不传 必须是一个对象
+        4.subscriptions //可传可不传，必须是一个对象
+      
+    然后model函数通过profixednamespace函数给model加上前缀，最后将model添加到app的_model就完成了注册
+
+
+```javascript
+    function model(m) {
+    if (process.env.NODE_ENV !== 'production') {
+      checkModel(m, app._models);
+    }
+    const prefixedModel = prefixNamespace({ ...m });
+    app._models.push(prefixedModel);
+    return prefixedModel;
+  }
+```
+
+## start方法(start方法是dva-core的核心)
+ dva的start方法是完成了model和view的绑定，dva-core的start就是完成了对react-redux的调用和redux-saga的调用，在dva的导出函数里就执行了dva-core的start的调用
