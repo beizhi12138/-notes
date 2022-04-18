@@ -1,0 +1,73 @@
+<mxfile host="65bd71144e">
+    <diagram id="89b1aU4uFKAG94mcCGeU" name="第 1 页">
+        <mxGraphModel dx="465" dy="437" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="2" value="用户:const app=dva();&lt;br&gt;app.model();&lt;br&gt;app.start('#root');" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="10" y="20" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" value="定义配置项:createopts&lt;br&gt;app（通过core。create创建app）&lt;br&gt;&lt;br&gt;此处通过bind实现代理调用start同时实现core的start&lt;br&gt;返回app" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="20" y="130" width="120" height="160" as="geometry"/>
+                </mxCell>
+                <mxCell id="5" value="dva()" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="50" y="100" width="60" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="6" value="通过调用core.create时给app添加的model方法，调用得到model数组" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="170" y="130" width="120" height="190" as="geometry"/>
+                </mxCell>
+                <mxCell id="7" value="app.model" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+                    <mxGeometry x="175" y="100" width="70" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="8" value="添加路由" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="300" y="130" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="9" value="app.router" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="330" y="90" width="60" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="11" value="通过&amp;lt;provider&amp;gt;将model层于view层进行绑定&lt;br&gt;通过render渲染" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="40" y="370" width="120" height="150" as="geometry"/>
+                </mxCell>
+                <mxCell id="12" value="app.start（同时调用core.start）" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="60" y="330" width="60" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="26" value="" style="edgeStyle=none;html=1;" edge="1" parent="1" source="13" target="23">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="13" value="创建全局错误处理函数,&lt;br&gt;createsagamiddleware创建saga中间件&lt;br&gt;&lt;br&gt;promisemiddlware函数，判断model的type是否是effect里的如果是返回promise并封装action在getsaga里使用" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="40" y="620" width="120" height="170" as="geometry"/>
+                </mxCell>
+                <mxCell id="14" value="core.start（此时model已经在用于app.model时有了数据）" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="50" y="575" width="130" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="25" value="" style="edgeStyle=none;html=1;" edge="1" parent="1" source="18" target="24">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="18" value="创建sagas数组，遍历所有的model添加state和reducer并且判断是否有effect如果有effects就经过getsaga处理后添加到sagas树组里" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="290" y="630" width="120" height="170" as="geometry"/>
+                </mxCell>
+                <mxCell id="27" value="" style="edgeStyle=none;html=1;" edge="1" parent="1" source="23" target="18">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="23" value="下一步" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="195" y="680" width="60" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="29" value="" style="edgeStyle=none;html=1;" edge="1" parent="1" source="24" target="28">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="24" value="遍历sagas数组，执行&lt;br&gt;sagamiddlewore.run&lt;br&gt;实现对effect的监听" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="470" y="630" width="120" height="170" as="geometry"/>
+                </mxCell>
+                <mxCell id="28" value="创建store，&lt;br&gt;添加订阅(subscriptions)&lt;br&gt;返回store" style="whiteSpace=wrap;html=1;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="670" y="590" width="120" height="210" as="geometry"/>
+                </mxCell>
+                <mxCell id="30" value="给每一个effect添加watcjer实现监听&lt;br&gt;&lt;br&gt;getsaga函数返回一个geneator函数，geneator函数就是对当前函数暂停操作然后执行其他的函数执行完后再返回来继续执行" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="100" y="880" width="120" height="160" as="geometry"/>
+                </mxCell>
+                <mxCell id="31" value="getsaga" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="120" y="840" width="60" height="30" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
