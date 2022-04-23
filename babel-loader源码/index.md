@@ -59,6 +59,7 @@
   // and we will return early
   //判断文件有没有type,这个type就是文件里的模块，比如index.vue文件里有style,template等模块
   //那么他的type就是  index.vue?type=template  ,index.vue?type=style,然后将这些模块传入selectBlock进行解析
+  //为什么要判断因为第一次进入的时候是index.vue是不带type的但是还是要对code进行loader处理，所以仅从判断
   if (incomingQuery.type) {
     return selectBlock(
       descriptor,
@@ -69,3 +70,186 @@
   }
 
 ```
+如果没有type就对code进行处理后返回
+
+```JavaScript
+//如果没有type字段则导出code源码
+  // module id for scoped CSS & hot-reload
+  const rawShortFilePath = path
+    .relative(context, resourcePath)
+    .replace(/^(\.\.[\/\\])+/, '') //源码文件名称和路径
+
+  const shortFilePath = rawShortFilePath.replace(/\\/g, '/') + resourceQuery
+  //短文件名称和路径
+  const id = hash(
+    isProduction ?
+    (shortFilePath + '\n' + source.replace(/\r\n/g, '\n')) :
+    shortFilePath
+  ) //文件id
+  // feature information 文件特征信息
+  const hasScoped = descriptor.styles.some(s => s.scoped) //寻找是否有scoped
+  const hasFunctional = descriptor.template && descriptor.template.attrs.functional //寻找template是否有function
+  const needsHotReload = (
+    !isServer &&
+    !isProduction &&
+    (descriptor.script || descriptor.template) &&
+    options.hotReload !== false
+  )
+  //判断有没有template
+  // template
+  let templateImport = `var render, staticRenderFns`
+  let templateRequest
+  if (descriptor.template) {
+    const src = descriptor.template.src || resourcePath //文件的路径
+    const idQuery = `&id=${id}` //文件的id
+    const scopedQuery = hasScoped ? `&scoped=true` : `` //是否带有scoped
+    const attrsQuery = attrsToQuery(descriptor.template.attrs) //attr属性
+    const query = `?vue&type=template${idQuery}${scopedQuery}${attrsQuery}${inheritQuery}` //累加所有的type
+    const request = templateRequest = stringifyRequest(src + query) //文件的全部比如 index.vue?vue&type=template&scoped=true
+    templateImport = `import { render, staticRenderFns } from ${request}`
+  }
+  // script 判断有没有script
+  let scriptImport = `var script = {}`
+  if (descriptor.script) {
+    const src = descriptor.script.src || resourcePath
+    const attrsQuery = attrsToQuery(descriptor.script.attrs, 'js')
+    const query = `?vue&type=script${attrsQuery}${inheritQuery}`
+    const request = stringifyRequest(src + query)
+    scriptImport = (
+      `import script from ${request}\n` +
+      `export * from ${request}` // support named exports
+    )
+  }
+
+  // styles  判断styles
+  let stylesCode = ``
+  if (descriptor.styles.length) {
+    stylesCode = genStylesCode(
+      loaderContext,
+      descriptor.styles,
+      id,
+      resourcePath,
+      stringifyRequest,
+      needsHotReload,
+      isServer || isShadow // needs explicit injection?
+    )
+  }
+
+  let code = `
+${templateImport}
+${scriptImport}
+${stylesCode}
+
+/* normalize component */
+import normalizer from ${stringifyRequest(`!${componentNormalizerPath}`)}
+var component = normalizer(
+  script,
+  render,
+  staticRenderFns,
+  ${hasFunctional ? `true` : `false`},
+  ${/injectStyles/.test(stylesCode) ? `injectStyles` : `null`},
+  ${hasScoped ? JSON.stringify(id) : `null`},
+  ${isServer ? JSON.stringify(hash(request)) : `null`}
+  ${isShadow ? `,true` : ``}
+)
+  `.trim() + `\n`
+  if (descriptor.customBlocks && descriptor.customBlocks.length) {
+    code += genCustomBlocksCode(
+      descriptor.customBlocks,
+      resourcePath,
+      resourceQuery,
+      stringifyRequest
+    )
+  }
+
+  if (needsHotReload) {
+    code += `\n` + genHotReloadCode(id, hasFunctional, templateRequest)
+  }
+
+  // Expose filename. This is used by the devtools and Vue runtime warnings.
+  if (!isProduction) {
+    // Expose the file's full path in development, so that it can be opened
+    // from the devtools.
+    code += `\ncomponent.options.__file = ${JSON.stringify(rawShortFilePath.replace(/\\/g, '/'))}`
+  } else if (options.exposeFilename) {
+    // Libraries can opt-in to expose their components' filenames in production builds.
+    // For security reasons, only expose the file's basename in production.
+    code += `\ncomponent.options.__file = ${JSON.stringify(filename)}`
+  }
+
+  code += `\nexport default component.exports`
+  //在这里对code进行一系列拼接后返回
+  return code
+
+```
+如果没有type所返回的code是这样的
+
+<img src='./01.png' />
+
+可以看到返回的code依旧引入了.vue文件所以会再次进入vue-loader里边，但是这次是带有type的会进入上边的判断type里进入到selectBlock里进行处理selectBlock是在select.js里的
+
+```JavaScript
+// selectBlock接收四个参数
+ //select.js
+ module.exports = function selectBlock (
+  descriptor,//所包含的模块的信息,
+  loaderContext,//当前文件的信息
+  query,//index.vue?type=template 
+  appendExtension
+) {
+  //判断接收到的模块然后调用webpack配置的html,style,js的loader去进行匹配
+  // template
+  if (query.type === `template`) {
+    if (appendExtension) {
+      loaderContext.resourcePath += '.' + (descriptor.template.lang || 'html')
+    }
+    loaderContext.callback(
+      null,
+      descriptor.template.content,
+      descriptor.template.map
+    )
+    return
+  }
+
+  // script
+  if (query.type === `script`) {
+    if (appendExtension) {
+      loaderContext.resourcePath += '.' + (descriptor.script.lang || 'js')
+    }
+    loaderContext.callback(
+      null,
+      descriptor.script.content,
+      descriptor.script.map
+    )
+    return
+  }
+
+  // styles
+  if (query.type === `style` && query.index != null) {
+    const style = descriptor.styles[query.index]
+    if (appendExtension) {
+      loaderContext.resourcePath += '.' + (style.lang || 'css')
+    }
+    loaderContext.callback(
+      null,
+      style.content,
+      style.map
+    )
+    return
+  }
+
+  // custom
+  if (query.type === 'custom' && query.index != null) {
+    const block = descriptor.customBlocks[query.index]
+    loaderContext.callback(
+      null,
+      block.content,
+      block.map
+    )
+    return
+  }
+}
+
+```
+
+分别对template和style和js和custom模块进行处理，处理的方式就是通过调用webpack配置的对html,js,style进行loader处理
