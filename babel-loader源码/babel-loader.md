@@ -60,4 +60,5 @@ AST={
     vue模板编译、react模板编译
     包括我们使用的VsCode插件使得代码高亮也使用的语法树
 
-# babel-loader源码解析
+# babel-loader
+  babel-loader主要讲述了从接收到文件，采用异步处理，判断有没有额外的配置的loader，如果有先调用额外的配置的loader，最后通过transfrom('@babel/core')函数进行转换，最后返回结果的过程
