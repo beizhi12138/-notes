@@ -470,3 +470,5 @@ module.exports = /*#__PURE__*/ function () {
 module.exports.version = babel.version;
 
 ```
+
+如果要看babe;/core.transform是如何转换的请看babel/core.transform源码解析
