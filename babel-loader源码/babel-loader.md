@@ -16,8 +16,8 @@
    babel是将高级语法编译成低级语法的工具，webpack通过babel-loader使用babel
 
  ## babel的工作流程
-   1.先将代码转换成token
-   2.再把token转换成AST语法树(babel-parse将代码转换成Ast语法树)
+   1.接收到代码
+   2.再把代码转换成AST语法树(babel-parse将代码转换成Ast语法树)
    3.变换，对ASt进行转换处理(babel-taraves提供遍历语法树节点的能力)
    4.输出代码(babel-generator转换成目标代码，并打印代码)
  ## 什么是AST(抽象语法树)
