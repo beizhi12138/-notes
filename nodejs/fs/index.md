@@ -208,3 +208,42 @@ const data=fs.readFileSync(url).toString('base64');
   }
 
 ```
+
+### 使用images实现图片压缩
+
+  实现图片批量压缩需要使用到images模块，所以需要先npm install images
+
+```JavaScript
+  const fs=require('fs');
+  const images=require('images');
+  const MySet=new Set();
+  //声明一个集合用来存储所有图片文件的后缀
+  MySet.add('jpg');
+  MySet.add('png');
+  MySet.add('jpeg')
+  const jpgY=(path)=>{
+      //path就是需要压缩图片的文件夹路径
+      fs.readdir(path,(err,data)){
+          if(err){console.log(err);return;}
+          data.forEach(item=>{
+              //对文件夹的内容进行遍历
+              const FilePath=path+'/'+item
+              fs.stat(FilePath,(err,stat)){
+                  if(err){console.log(err);return;}
+                  if(stat.isFile()){
+                      //判断是文件还是文件夹
+                      if(MySet.has(item.split('.')[1])){
+                          //如果是文件则判断后缀是否是图片文件
+                          const outPutName=path+'/author_'+item;
+                          images(FilePath).save(outPutName,{ quality : 30  }) //图片质量为30
+                      }
+                  }else{
+                      //如果是文件夹则循环进行遍历
+                     jpgY(FilePath);
+                  }
+              }
+          })
+      }
+  }
+  jpgY('./Img')
+```
