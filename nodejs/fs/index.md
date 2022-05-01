@@ -142,3 +142,69 @@ c.pipe(writeSteam)
        console.log(data);
    })
 ```
+
+## 使用fs实现base64 与png/jpg/jpeg 互相转换
+
+  ### png与jpg转换
+
+```JavaScript
+// 因为要用到异步操作所以需要用到util.promisify将函数转换
+//第一种写法，
+const util = require('util')
+const readFile=util.promisify(fs.readFile)
+readFile('./index.png').then(res=>{
+    //得到图片的编码后  
+     fs.writeFile('./index.jpg',res,(err)=>{
+         //写入到jpg文件里
+         if(err){console.log(err)}
+         console.log('写入成功')s
+     })
+})
+//第二种写法
+  const util=require('util');
+  const readFile=util.promisify(fs.readFile);
+  const aa=async ()=>{
+        const data=await readFile('./index.png');
+        fs.writeFile('./index.jpg',data,err=>{
+            if(err){console.log(err);return;}
+            console.log('写入成功');
+        })
+  }
+  aa()
+
+ //第三种写法
+ const data=fs.readFileSync('./index.png');
+ fs.writeFile('./index.jpg',data,err=>{
+     if(err){console.log(err);return;}
+     console.log('写入成功')
+ })
+
+
+```
+
+  ### png与base64转换
+
+
+```JavaScript
+const base=(url)=>{
+const data=fs.readFileSync(url).toString('base64');
+   return 'data:image/bmp;base64,'+data
+}
+  base(url);//url图片的路径
+
+```
+
+  ### base64与png转换
+
+```JavaScript
+  const BasePng=(base)=>{
+      //base就是需要转换的base64编码
+      const data=base.replace(/^data:image\/\w+;base64,/,'')
+      //通过正则匹配掉base64的前缀
+      fs.writeFile('./index.png',data,'base64',err=>{
+          if(err){console.log(err);return;}
+          console.log('写入成功')
+      })
+  }
+
+```
