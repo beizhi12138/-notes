@@ -209,7 +209,7 @@ const data=fs.readFileSync(url).toString('base64');
 
 ```
 
-### 使用images实现图片压缩
+## 使用images实现图片压缩
 
   实现图片批量压缩需要使用到images模块，所以需要先npm install images
 
@@ -246,4 +246,64 @@ const data=fs.readFileSync(url).toString('base64');
       }
   }
   jpgY('./Img')
+```
+
+## nodejs实现前端上传图片后端接收
+
+   首先需要写一个前端简易的上传图片调取接口功能(html+jquery)
+   然后node通过koa搭建接口，接收图片保存
+
+```JavaScript
+  //index.html
+    <input id="fileupload" type="file" class="form-control" name="file">
+    <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+    <script>
+        $("#fileupload").on("change", function () {
+            var file = this.files[0];
+            var data = new FormData();
+            data.append("file", file);
+            $.ajax({
+                type: "post",
+                url: "/Img",
+                data: data,
+                contentType: false,
+                //默认文件类型application/x-www-form-urlencoded  设置之后multipart/form-data
+                processData: false,
+                // 默认情况下会对发送的数据转化为对象 不需要转化的信息
+                success: function (res) {
+                    console.log(res,'res')
+                    // source = res.picAddr;
+                },
+            });
+        })
+    </script>
+
+    //index.js
+const Koa = require('koa');
+const app = new Koa();
+const bodyParse=require('koa-body')
+const router=require('koa-router')();
+router.post('/Img',ctx=>{
+    ctx.body='接收成功1'
+   ctx.req.on('data', data=>{
+    const buf=new Buffer(data);
+      //拿到传过来的参数后写入module里
+      fs.writeFile('./module/inputs.jpeg',buf,err=>{
+         if(err){console.log(err);return;}
+         console.log('存储成功')
+      })
+    });
+  
+})
+router.get('/index',async ctx=>{
+     ctx.type='html';
+     ctx.body=fs.readFileSync('./index.html')
+})
+app.use(router.routes(), router.allowedMethods());
+app.use(bodyParse({
+    multipart:true,
+}))
+app.listen('3000', () => {
+  console.log(`server is running at http://localhost:3000`)
+});
 ```
