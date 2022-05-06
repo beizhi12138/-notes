@@ -7,19 +7,19 @@
   实例介绍
 
 ```JavaScript
-//index.js
-  //首先我们使用流来创建一个大文件
+ index.js
+   首先我们使用流来创建一个大文件
   const fs=require('fs');
   const file=fs.createWriteStream('./big.txt');
   for(let i=0;i<999999;i++){
     file.write(`写入的第${i}次`)
   }
   file.end();
-  //http.js
-  //现在我们的big.txt起码要有及时MB了
-  //搭建一个服务器来返回我们的大文件
+  //  http.js
+  //  现在我们的big.txt起码要有及时MB了
+  //  搭建一个服务器来返回我们的大文件
 
-    //不使用流
+    //  不使用流
   const fs=require('fs');
   const http=require('http');
   const server=http.createServer();
@@ -32,7 +32,7 @@
   server.listen(9000);
 
 
-  //使用流
+  //  使用流
   const fs=require('fs');
   const http=require('http');
   const server=http.createServer();
@@ -66,115 +66,226 @@
 ## node模块里的流
   很多的node内置模块都有流的操作，比如http里的req是可读流，res是可写流,fs的createReadStream是可读流,createWriteStream是可写流
 
-## readable可读流的方法
+## readable可读流的事件
   可读流可以使用on来监听data,error,open,close,end事件
 ```JavaScript
    const fs=require('fs');
 const server=require('http').createServer();
 server.on('request',(req,res)=>{
     const src=fs.createReadStream('./big.txt',{
-         //配置信息
-    //如果没调置，则读取的数据会是 Buffer
-    //也可以通过 rs.setEncoding() 进行设置
+          // 配置信息
+    //  如果没调置，则读取的数据会是 Buffer
+    //  也可以通过 rs.setEncoding() 进行设置
     encoding: 'utf8',
-    //文件描述符，默认为null
+    //  文件描述符，默认为null
     fd: null,
-    //文件权限
+    //  文件权限
     mode: 0o666,
-    //文件读取的开始位置
+    //  文件读取的开始位置
     start: 0,
-    //文件读取的结束位置(包括结束位置)
+    //  文件读取的结束位置(包括结束位置)
     end: Infinity,
-    //读取缓冲区的大小，默认64K
+    //  读取缓冲区的大小，默认64K
         highWaterMark:1 
     });
-    // src.on('readable',e=>{
-    //     //监听readble事件也会暂停流动,要手动开启src.read(),才会继续
-    //     let data=src.read();
-    // })
-    // src.on('open',e=>{
-    //     console.log('文件打开时触发open事件')
-    // })
+      src.on('readable',e=>{
+          //  监听readble事件也会暂停流动,要手动开启src.read(),才会继续
+          let data=src.read();
+      })
+      src.on('open',e=>{
+          console.log('文件打开时触发open事件')
+      })
     src.on('data',(e)=>{
-        src.pause() //暂停了流动，所有的数据都会存储在内存缓冲区
-      //当有数据进入流时会触发data事件
+        src.pause()  //暂停了流动，所有的数据都会存储在内存缓冲区
+      //  当有数据进入流时会触发data事件
         console.log('触发了data事件')
         console.log('暂停了流的流动1秒后继续')
         setTimeout(()=>{
-            src.resume()//继续流动
-             src.unpipe(); //移除管道
+            src.resume() ////继续流动
+             src.unpipe(); // 移除管道
         },3000)
     })
-    // src.on('error',(e)=>{
-    //     console.log('触发了error事件')
-    // })
-    // src.on('end',(e)=>{
-    //     console.log('数据传输结束触发end事件')
-    // })
-    // src.on('close',e=>{
-    //     console.log('文件关闭时触发的事件')
-    // })
-    //pipe就是一个管道，数据一点点的通过res返回给客户端
-    src.pipe(res);//设置管道
+      src.on('error',(e)=>{
+          console.log('触发了error事件')
+      })
+      src.on('end',(e)=>{
+          console.log('数据传输结束触发end事件')
+      })
+      src.on('close',e=>{
+          console.log('文件关闭时触发的事件')
+      })
+    //  pipe就是一个管道，数据一点点的通过res返回给客户端
+    src.pipe(res); 设置管道
 })
 server.listen(8000)
 ```
 
-## writable(可写流的方法)
+## writable(可写流的事件)
   ```JavaScript
   const fs=require('fs');
 const ReadStream=fs.createReadStream('./big.txt');
 const WriteStream=fs.createWriteStream('./index.txt',
 
     {
-        //配置
-     //设置缓冲区的大小
+        //  配置
+      // 设置缓冲区的大小
         highWaterMark: 1
     }
 );
 
-// function writeData() {
-//     let cnt = 9;
-//     return function () {
-//         let flag = true;
-//         while (cnt && flag) {
-//             flag = WriteStream.write(`${cnt}`);
-//             console.log('缓冲区中写入的字节数', WriteStream.writableLength);
-//             cnt--;
-//         }
-//     };
-// }
+  function writeData() {
+      let cnt = 9;
+      return function () {
+          let flag = true;
+          while (cnt && flag) {
+              flag = WriteStream.write(`${cnt}`);
+              console.log('缓冲区中写入的字节数', WriteStream.writableLength);
+              cnt--;
+          }
+      };
+  }
  
-// let wd = writeData();
-// wd();
-//当缓冲区中的数据满的时候，应停止写入数据，
-//一旦缓冲区中的数据写入文件了，并清空了，则会触发 'drain' 事件，告诉生产者可以继续写数据了。
-// WriteStream.on('drain',() =>{
-//     console.log('可以继续写数据了');
-//     console.log('缓冲区中写入的字节数', WriteStream.writableLength);
-//     wd();
-// });
-// //文件被关闭时触发
-// WriteStream.on('close',  () =>{
-//     console.log('文件被关闭');
-// });
-// WriteStream.end('传输文件终止')
-// WriteStream.on('finish',()=>{
-//     console.log('传输文件完成了')
-// })
-// //当写入数据出错时触发
-// WriteStream.on('error',  () =>{
-//     console.log('写入数据错误');
-// });
+  let wd = writeData();
+  wd();
+//  当缓冲区中的数据满的时候，应停止写入数据，
+//  一旦缓冲区中的数据写入文件了，并清空了，则会触发 'drain' 事件，告诉生产者可以继续写数据了。
+  WriteStream.on('drain',() =>{
+      console.log('可以继续写数据了');
+      console.log('缓冲区中写入的字节数', WriteStream.writableLength);
+      wd();
+  });
+  //  文件被关闭时触发
+  WriteStream.on('close',  () =>{
+      console.log('文件被关闭');
+  });
+  WriteStream.end('传输文件终止')
+  WriteStream.on('finish',()=>{
+      console.log('传输文件完成了')
+  })
+  //  当写入数据出错时触发
+  WriteStream.on('error',  () =>{
+      console.log('写入数据错误');
+  });
 
-//调用cork函数不会因为超出缓冲区而强制将内容输出到文件里
-// WriteStream.cork();
-// console.log(WriteStream.write('1','utf8'));
-// console.log(WriteStream.write('2','utf8'));
-// console.log(WriteStream.write('3','utf8'));
-// WriteStream.uncork();
-//调用uncork会将缓冲区的内容输出到文件里
+  // 调用cork函数不会因为超出缓冲区而强制将内容输出到文件里
+ WriteStream.cork();
+ console.log(WriteStream.write('1','utf8'));
+ console.log(WriteStream.write('2','utf8'));
+ console.log(WriteStream.write('3','utf8'));
+ WriteStream.uncork();
+//  调用uncork会将缓冲区的内容输出到文件里
 
 
   ```
-   
+## Duplex (双工流)
+  之所以称为双工流，是因为他实现了可读流和可写流
+  双工流里实现了可读流和可写流所以我们可以直接使用可读流和可写流的方法
+  以及使用on来监听可读流和可写流的事件
+```JavaScript
+ const Stream=require('stream');
+const DeluxStream=Stream.Duplex();
+DeluxStream._read = function () {
+    var date = new Date();
+    this.push( date.getFullYear().toString() );
+    this.push(null)
+};
+
+DeluxStream._write = function (buf, enc, next) {
+    console.log( buf.toString() + '\n' );
+    next()
+};
+DeluxStream.on('finish',()=>{
+    console.log('写入完成')
+})
+DeluxStream.write('1');
+DeluxStream.end('结束写入')
+
+```
+
+## 实现可写流
+fs的可写流是给我们封装好的方法，我们需要通过stream模块来自己封装一个可写流
+
+```JavaScript
+  const { Writable} =require('stream');
+const fs=require('fs');
+class myWriteStream extends Writable{
+    constructor({highWaterMark,filepath,...options}){
+        super({highWaterMark,...options})
+        this.filepath=filepath; //文件的路径
+        this.fd=null //指定的文件
+    }
+    _construct(callback){
+         //在流初始化的时候会内部调用_construct方法
+         fs.open(this.filepath,(err,fd) =>{
+             if(err){console.log(err);return}
+             this.fd=fd;
+             callback();
+         });
+        
+    }
+    _write(chunk,code,next){
+        fs.appendFile(this.filepath,chunk,next);
+    }
+    _destroy(err,next){
+        //销毁流的时候会调用此方法
+        if(err){
+            //如果销毁流的时候有报错，。传入报错
+            next(err);
+        }else{
+            //没有错误则关闭文件
+            fs.close(this.fd,e=>next(e || err))
+        }
+    }
+}
+const myStreamWrite=new myWriteStream({highWaterMark:100,filepath:'index.txt'});
+myStreamWrite.write('1');
+myStreamWrite.write('2');
+myStreamWrite.on('data',()=>{
+    console.log('开始写入数据')
+})
+myStreamWrite.end('666');
+myStreamWrite.on('finish',()=>{
+    console.log('写入完成')
+})
+myStreamWrite.on('error',(e)=>{
+    console.log(e,'报错了')
+})
+// console.log(myStreamWrite);
+```
+## 实现可读流
+
+```JavaScript
+
+ class myReadStream extends Readable {
+    constructor(filepath){
+        super()
+        this.filepath=filepath;
+        this.fd=null;
+    }
+    _construct(next){
+        fs.open(this.filepath,(err,data)=>{
+            if(err){
+                console.log(err);
+                return;
+            }
+           this.fd=data;
+           next();
+        })
+    }
+    _read(n){
+      fs.readFile(this.filepath,(err,data)=>{
+          if(err){this.destroy(err);return;}
+          this.push(data);
+      })
+    }
+    _destrory(err,next){
+        if(err){next(err)};
+        fs.close(this.filepath,(error,data)=>{
+            if(error){next(error)}
+            next()
+        })
+    }
+}
+
+const MyStreamRead=new myReadStream('./index.txt');
+```
