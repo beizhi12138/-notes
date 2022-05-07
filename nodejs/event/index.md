@@ -74,3 +74,46 @@ event.emit('event',1,2);
   })
   MyEventEmitter('error' , new Error('报错了'))
 ```
+
+## EventEmitter类
+
+  ### newListener事件
+    在我们添加事件监听的时候会触发newListener事件，所以我们可以注册newListener事件用来在添加事件监听的时候做一些事情
+```JavaScript
+ const {EventEmitter}=require('events');
+  const MyEvent=new EventEmitter();
+  MyEvent.on('newListener',(name,litener)=>{
+      //name就是正在监听的事件的名称
+      //listener是事件的处理函数
+      MyEvent.on('event',()=>{
+        console.log('在newListener添加的事件')
+      })  
+  })
+  MyEvent.on('event',()=>{
+      console.log('正常注册的event事件')
+  })
+  //此时我们再不触发event事件的情况下，newListener事件就会执行，因为我们只要正在注册事件就会触发newListener事件
+  //注意:newListener事件必须要使用EventEmitter.once()注册，因为如果我们在newListener事件里再去添加注册事件的话，而且外边有多个注册事件就会触发多次newListener事件,就会发生堆栈溢出
+ MyEvent.emit('event');
+
+ //打印的结果
+   //    在newListener注册的事件
+   //     正常注册的event事件
+```
+  ### removeListener事件
+    removeListener事件用于删除已经注册的事件，但是，removeListener不会阻止掉正在被emit触发的事件
+```javaScript
+ const callbackB=()=>{
+    console.log('B')
+}
+const callbackA=()=>{
+    console.log('A')
+    event.removeListener('data',callbackB)
+}
+event.on('data',callbackA)
+event.on('data',callbackB)
+
+event.emit('data'); //在执行callbackA的时候删除了data，但是不会阻止掉下一个emit的触发
+event.emit('data'); //在这里的时候才是真正被删除掉了
+
+```
