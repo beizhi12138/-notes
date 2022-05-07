@@ -115,5 +115,41 @@ event.on('data',callbackB)
 
 event.emit('data'); //在执行callbackA的时候删除了data，但是不会阻止掉下一个emit的触发
 event.emit('data'); //在这里的时候才是真正被删除掉了
+```
+ ###    addListener 和on的作用一样
+ ### eventNames
+   返回一个数组，数组里包含了所有已经注册的事件的名称
 
+```JavaScript
+ const {EventEmitter} =require('events');
+ const MyEvent=new EventEmitter();
+ MyEvent.on('data',()=>{});
+ MyEvent.on('finish',()=>{});
+ console.log(MyEvent.eventNames());
+ 
+ //打印结果
+  ['data','finish']
+```
+
+### getMaxListeners
+  返回可以注册的事件的最大数值，默认是10,如果超过10个会有警告
+  但是我们可以通过setMaxListener(20) 去进行修改
+
+```JavaScript
+const {EventEmitter} =require('events');
+ const MyEvent=new EventEmitter();
+ console.log(MyEvent.getMaxListener()); //10
+ event.setMaxListener(20); 
+ console.log(MyEvent.getMaxListener(20));
+```
+### listenerCount 
+  返回注册的事件的数量
+
+```JavaScript
+ const {EventEmitter} =require('events');
+ const MyEvent=new EventEmitter();
+ MyEvent.on('data',()=>{});
+ MyEvent.on('data',()=>{});
+ MyEvent.on('finish',()={});
+ console.log(MyEvent.listenerCount()) // 2
 ```
