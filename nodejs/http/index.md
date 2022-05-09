@@ -180,5 +180,5 @@ a.on('data',e=>{
       console.log('socket事件被触发')
    })
 ```
-## Server类 
+## Server类 (node做web服务器的重中之重)
   server是用于我们使用node搭建服务器，
