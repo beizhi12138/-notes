@@ -181,4 +181,211 @@ a.on('data',e=>{
    })
 ```
 ## Server类 (node做web服务器的重中之重)
-  server是用于我们使用node搭建服务器，
+  server是用于我们使用node搭建服务器，express框架就是基于Server类的
+
+  实例演示
+
+```JavaScript
+const Http=require('http');
+const Server=new Http.Server();
+//监听request事件，
+Server.on('request',(req,res)=>{
+    //两个参数
+    //req  客户端请求的内容
+    //res  服务端要相应的内容
+    res.wirte(); //向相应内容里写入内容
+    res.end(''); //结束的内容
+    Server.close(); //关闭服务
+})
+Server.listen(8080); //开启服务，设置端口号
+```
+
+ ### Server的方法
+  #### checkContinue
+   当服务端的请求头有Expect:100-continue会触发此事件，而且不再触发request事件
+
+```JavaScript
+   const Http=require('http');
+const Server=new Http.Server();
+//如果请求头带有 Expect:100-continue 将会直接触发此事件，不再触发request事件
+Server.on('checkContinue',(req,res)=>{
+   //两个参数
+    //req  客户端请求的内容
+    //res  服务端要相应的内容
+    res.wirte(); //向相应内容里写入内容
+    res.end(''); //结束的内容
+    Server.close(); //关闭服务
+})
+Server.listen(8080); //开启服务，设置端口号
+```
+#### checkExpectation
+  请求头中带有,Expect属性且值不是100-continue会触发此事件，且不再触发request事件
+
+```JavaScript
+const Http=require('http');
+const Server=Http.Server();
+Server.on('checkExpectation',(req,res)=>{
+   //请求头中带有Expect属性且是除了100-continue以外的任何值，且不再触发request事件
+   //两个参数
+    //req  客户端请求的内容
+    //res  服务端要相应的内容
+    res.wirte(); //向相应内容里写入内容
+    res.end(''); //结束的内容
+    Server.close(); //关闭服务
+})
+Server.listen(8080);
+```
+#### clientError
+  当客户端连接触发error事件时，会触发此事件
+
+```JavaScript
+Server.on('clientError',(err,socket)=>{
+    socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
+})
+```
+
+#### close
+  当调用Server.close()时触发
+
+```JavaScript
+const Http=require('http');
+const Server=new Http.Server();
+Server.on('request',(req,res)=>{
+   res.end();
+   Server.close();
+})
+Server.on('close',()=>{
+   console.log('监听到了服务关闭')
+})
+```
+
+#### request
+  每次接收到请求时都会触发request事件
+
+```JavaScript
+Server.on('request',(req,res)=>{
+   //一般接收到请求后都会触发到request事件
+})
+
+```
+
+#### close 
+  close方法用于关闭服务,调用此方法会触发close事件
+
+```JavaScript
+ Server.close();
+```
+
+#### listen
+  listen方法用于开启服务,
+
+```JavaScript
+ Server.listen(8080);
+ //接收一个参数，端口号
+```
+
+#### headersTimeout
+  headersTimeout方法用来限制，解析请求头的时间，如果超时则关闭连接
+
+```JavaScript
+ Server.headersTimeout(8000);
+
+ //接收一个参数，限制多少毫秒
+```
+#### listening
+  listenting属性用来查看是否正在监听连接，即服务是否开启
+```JavaScript
+ console.log(Server.listening);
+ // false  未开启
+ // true  开启了
+```
+
+## ServerResponse类
+   ServerResponse就是request事件里的，res
+
+```JavaScript
+  const Http=require('http');
+  const Server=new Http.Server();
+  Server.on('request',(req,res)=>{
+   //res就是ServerResponse类 它是一个可写流
+  })
+  Server.listen(8080);
+```
+ ### res的方法
+
+   #### SetHeader
+     设置响应头
+```JavaScript
+const Http=require('http');
+  const Server=new Http.Server();
+  Server.on('request',(req,res)=>{
+   //res就是ServerResponse类 它是一个可写流
+   res.setheader('Content-type':'text/json');
+  })
+  Server.listen(8080);
+
+```
+#### getHeader
+  获取响应头
+```JavaScript
+res.getHeader('响应头名称')
+```
+#### hasHeader
+  查询响应后
+
+```JavaScript
+  res.hasHeader('响应头名称');
+```
+#### getHeadersNames
+  获取到所有响应头的名称
+
+```JavaScript
+ consoel.log(res.getHeadersNames());
+```
+#### getHeaders
+  获取到所有的响应头
+```JavaScript
+console.log(res.getHeaders());
+```
+#### statusCode
+ 设置相应的状态码
+ 
+```JavaScript
+  res.StatusCode=404
+```
+
+#### statusMeassage
+  设置响应的状态信息
+
+```JavaScript
+ res.statusMessage='Not Found'
+```
+
+#### write
+  写入响应内容，并发送
+```JavaScript
+   res.write('Hello World');
+```
+#### end
+  结束写入内容,可参考writeableStream的end方法
+```JavaScript
+ res.end('Hello World');
+```
+
+#### finish
+  finish事件，在开始响应请求时触发
+
+```JavaScript
+ res.on('finish',()=>{
+    console.log('开始响应请求')
+ })
+```
+
+#### close
+  close事件，请求响应完成时触发
+
+```JavaScript
+  res.on('close',()=>{
+     console.log('请求响应完成')
+  })
+```
