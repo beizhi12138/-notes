@@ -396,3 +396,104 @@ console.log(res.getHeaders());
      console.log('请求响应完成')
   })
 ```
+## IncomingMessage类
+  IncomingMessage分别存在于http.server(做服务端)里和http.request(发起请求)里边，在server里是request,在request里是response,它是一个可读流，包含了请求头，和数据和响应状态
+
+  实例演示
+
+```JavaScript
+  const Http=require('http');
+  const Server=new http.Server();
+  Server.on('request',(request,response)=>{
+      // request就是IncomingMessage
+  })
+  const ClientRequest=Http.request({
+     port:'8080',
+     host:"localhost",
+     protocol:'http:',
+     method:'GET',
+     path:'/'
+  },res=>{
+     //这里的res就是 IncomingMessage的实例
+  })
+```
+ ### IncominMessage的方法
+   #### close
+     当请求被关闭时触发,在server用req监听,在request里用res监听
+
+```JavaScript
+  //在server
+    const Http=require('Http');
+    const server=new Http.Server();
+    server.on('request',(req,res)=>{
+       req.on('close',()=>{console.log('服务端:请求关闭了')})
+    })
+    // 在request里
+
+    Http.request({
+       port:'8080',
+       host:'localhost',
+       protocol:'http:',
+       method:'GET',
+       path:'/'
+    },res=>{
+       res.on('claose',()=>{console.log('客户端:请求关闭了')})
+    })
+```
+#### complete 属性
+  如果已经成功解析HTTP消息，则complete属性为true,否则为false
+  最好在服务关闭的时候进行判断
+```javaScript
+  console.log(req.complete)
+```
+#### destory
+  关闭服务  或者  关闭请求
+
+```JavaScript
+//server.js
+  req.destory();
+
+//request
+  res.destory();
+```
+
+#### headers  httpVersion
+  http版本httpAVersion
+  接收到的headers
+  在服务端是客户端发来请求的的headers和http版本
+  在客户端是服务端返回数据的headers和http版本
+
+```JavaScript
+//server
+console.log(req.httpVersion);
+   console.log(req.headers);
+// request
+console.log(res.httpVersion)
+ console.log(res.headers);
+```
+
+#### method (仅使用于server)
+ 仅仅在服务端使用，客户端请求的方式，get 或者Post等
+```JavaScript
+//server
+console.log(req.method)
+```
+#### socket
+获取互相连接的socket,可在服务端或者客户端获取
+
+#### url
+  仅在服务端获取，得到客户端的url
+```JavaScript
+  console.log(req.url)
+```
+#### statucCode
+  仅仅在客户端获取，得到请求响应的状态码
+
+```JavaScript
+ console.log(res.statusCode);
+```
+
+ ##### 常见的http状态码
+   404  资源或者路径找不到
+   200  请求成功
+   204  请求成功，但是没有资源可以返回给客户端
