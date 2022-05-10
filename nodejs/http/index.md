@@ -258,7 +258,14 @@ Server.on('close',()=>{
    console.log('监听到了服务关闭')
 })
 ```
+#### connect
+  接收connect请求
 
+```JavaScript
+  Server.on('connect',(req,res)=>{
+     console.log('接收到了connect请求')
+  })
+```
 #### request
   每次接收到请求时都会触发request事件
 
