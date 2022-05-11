@@ -4,7 +4,7 @@
    2、做客户端，向其他服务端请求
 
 ## Agent模块
-   http协议是通过，浏览器发送请求，服务端相应请求这种方式交互，每次交互都需要进行，建立-传输-销毁的过程，http提供了持久连接即已经通过的连接可以重复使用，在客户端这个操作是浏览器完成的，但是在服务端需要我们自己来完成，所以有了agent
+   http协议是通过，浏览器发送请求，服务端 响应请求这种方式交互，每次交互都需要进行，建立-传输-销毁的过程，http提供了持久连接即已经通过的连接可以重复使用，在客户端这个操作是浏览器完成的，但是在服务端需要我们自己来完成，所以有了agent
    我们必须使用agent类来创建一个实例化，进行配置之后再去设置我们的请求的的agent
 
 ```JavaScript
@@ -78,7 +78,7 @@ a.on('data',e=>{
   path:'/' ,//请求路径'
   timeout:1000 //超时时间
   },res=>{
-      //请求受到相应之后的回调
+      //请求受到 响应之后的回调
   //res就是 http.IncomingMessage的实例这个在后边写
     res.on('data',data=>{
        //data就是返回过来的数据
@@ -192,8 +192,8 @@ const Server=new Http.Server();
 Server.on('request',(req,res)=>{
     //两个参数
     //req  客户端请求的内容
-    //res  服务端要相应的内容
-    res.wirte(); //向相应内容里写入内容
+    //res  服务端要 响应的内容
+    res.wirte(); //向 响应内容里写入内容
     res.end(''); //结束的内容
     Server.close(); //关闭服务
 })
@@ -211,8 +211,8 @@ const Server=new Http.Server();
 Server.on('checkContinue',(req,res)=>{
    //两个参数
     //req  客户端请求的内容
-    //res  服务端要相应的内容
-    res.wirte(); //向相应内容里写入内容
+    //res  服务端要 响应的内容
+    res.wirte(); //向 响应内容里写入内容
     res.end(''); //结束的内容
     Server.close(); //关闭服务
 })
@@ -228,8 +228,8 @@ Server.on('checkExpectation',(req,res)=>{
    //请求头中带有Expect属性且是除了100-continue以外的任何值，且不再触发request事件
    //两个参数
     //req  客户端请求的内容
-    //res  服务端要相应的内容
-    res.wirte(); //向相应内容里写入内容
+    //res  服务端要 响应的内容
+    res.wirte(); //向 响应内容里写入内容
     res.end(''); //结束的内容
     Server.close(); //关闭服务
 })
@@ -355,7 +355,7 @@ res.getHeader('响应头名称')
 console.log(res.getHeaders());
 ```
 #### statusCode
- 设置相应的状态码
+ 设置 响应的状态码
  
 ```JavaScript
   res.StatusCode=404
@@ -516,3 +516,95 @@ console.log(req.method)
       17、102 将继续执行请求
       18、101 请继续请求
 
+# http上的方法
+
+## METHODS
+
+  列出所有node支持的请求方法
+
+```JavaScript
+ const Http=require('http');
+ console.log(Http.METHODS); //返回一个数组
+```
+
+## STATUS_CODES
+ 返回一个对象,包含了所有http状态码，以及描述
+
+```JavaScript
+const Http=require('http');
+console.log(Http.STATUS_CODES);
+//返回数据
+
+{
+   404:"Not found",
+   ...
+}
+
+```
+
+## createServer
+  createServer方法，帮助我们快速搭建一个web服务器，它返回一个Server实例
+
+```JavaScript
+ const Http=require('http');
+ const server=Http.createServer();
+ server.on('request',(req,res)=>{
+
+ })
+ server.listen(8080);
+```
+
+## get
+ http.get方法，相当于http.request方法，主要用于请求，区别就是它的method固定于get
+
+```JavaScript
+const Http=require('http');
+const ClierntRequest=Http.get('http://localhost:8080',res=>{
+  res.on('data',data=>{
+    console.log(data.toString())
+  })
+})
+```
+
+## maxHeaderSize
+ 设置请求头大小(默认是16kb)
+
+```JavaScript
+http.maxHeaderSize=10;
+```
+## globalAgent
+  设置全局的agent
+
+```JavaScript
+const Http=require('http');
+//如果不设置的话是有默认值的
+console.log(Http.globalAgent);
+ Http.globalAgent{keepAlive: true, //开启长连接，因为每一次请求服务器，都要创建一次连接，完成后关闭，所以开启keep-live后会使得连接持续有效
+ maxSockets: 10, //最大的能使用的套接字(socket)数量
+ keepAliveMsecs: 1000, //指定Tcp的初始延迟时间
+ maxTotalSockets: 10, //主机允许的最大使用的套接字(socket)数量
+ maxFreeSockets: 1, //主机在空闲状态下保持打开的最大套接字(socket)数量
+ timeout: 2000} //连接超时
+```
+## request
+  request方法用于发起请求,它返回ClientRequest实例
+
+```JavaScript
+const Http=require('http');
+ const ClientRequest=Http.request({
+         host:'localhost',
+    port:'8080',
+    protocol:'http:',
+    method:'POST',
+    path:'/'
+ },res=>{
+ });
+     //如果是post请求用write方法用于写入数据
+   ClientRequsst.write('{msg:'11'}');
+ //request方法接收两个参数options,callback
+   // options 就是要请求的地址的信息以及请求方式请求路径等
+   // callback 就是请求接收到响应后的处理
+
+   //必须通过调用end方法，来发起请求
+ClientRequest.end();
+```
