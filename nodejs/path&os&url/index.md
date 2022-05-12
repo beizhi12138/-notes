@@ -199,3 +199,20 @@ console.log(myurl.search); //name=admin
 myurl.search='name=user';
 console.log(myurl.search); // name=user
 ```
+## URLSearchParams类
+  SearchParams的Api提供对url的?后内容进行的增删改查,也可以通过实例化URLSearchParams进行使用
+
+  
+SearchParams的使用
+
+```JavaScript
+ const myurl=new url('https://example.org:8080/foo?name=admin');
+
+ // 查
+ console.log(myurl.searchParams.get('name')); // admin
+ //增
+ myurl.searchParams.append('pwd','000');
+ //删
+ myurl.searchParams.delete('pwd');
+ //改
+```
