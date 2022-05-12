@@ -1,6 +1,7 @@
 # path
  path模块提供了，提供了处理文件和目录的路径，
-
+ path在node做服务端免不了要处理文件需要用到
+ path在打包和输出文件也需要用到
 ## basename
   basename 返回字符串，返回的是输入路径的最后的文件名
   basename接收一个参数，文件的路径
