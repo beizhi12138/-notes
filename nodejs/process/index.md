@@ -1,5 +1,5 @@
 # process
- process是nodejs用来控制进程的工具。
+ process是nodejs用来控制和管理进程的工具。
  ## beforeExit
    当node清空其事件循环，没有额外的工作要安排时会触发beforeExit事件。也就是说当nodejs没有事情要做，或者其他的事情都做完了之后会触发beforeExit事件。
 ```JavaScript
@@ -41,8 +41,8 @@ process.onI('message',e=>{
     console.log(e,'Father Message');
 })
 ```
-
-## rejectionHandled && unhandledRejection
+## 异常处理事件
+## rejectionHandled && unhandledRejection （用于捕获异步的异常）
   rejectionHandled和unhandledRejection都是用于处理promise错误未处理的事件的，例如:我们一般使用promise可能只写then但是不写catch就会触发unhandledRejection事件,写了catch且不在一轮事件循环中会触发rejectionHandled事件
 
 ```JavaScript
@@ -60,4 +60,33 @@ const rejected=Promise.reject('Error'); //promise有了错误，但是未用catc
 setTimeout(()=>{
   rejected.catch(()=>{}); //用间隔0.1秒用catch处理了，此时会触发rejectionHandled事件
 },100);
+```
+## uncaughtException  &&  uncaughtExceptionMonitor (捕获同步的异常)
+
+  uncaughtEcxcertion用于捕获异常，捕获到异常后进行异常处理，uncaughtExceptionMonitor会率先一步uncaughtException捕获到异常，但是如果没有注册uncaughtException事件，只注册uncaughtExceptionMonitor事件的话进程会直接报错。
+
+```JavaScript
+process.on('uncaughtException',(err,origin)=>{
+    console.log('捕获到了异常',err);
+})
+
+process.on('uncaughtExceptionMonitor',(err,origin)=>{
+    console.log('率先捕获到了异常');
+})
+function foo(){
+    throw new Error();
+}
+foo();
+// 此时执行foo的话如果不注册uncaughtException事件，进程会直接报错
+// 但是注册了uncaughtException事件的话会执行异常处理后，再退出进程
+
+//如果只注册了uncaughtExceptionMonitor会直接报错，不存在异常处理情况
+```
+## 信号事件
+  无论我们的node部署在哪里，比如当我们的进程停止时，运行node的系统会发出信号，触发信号事件
+
+## abort()
+   abort方法会立即退出进程，并且生成一个核心文件，但是在worke里此方法不可用
+```JavaScript
+process.abort();
 ```
