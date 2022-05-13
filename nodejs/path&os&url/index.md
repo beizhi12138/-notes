@@ -199,7 +199,7 @@ console.log(myurl.search); //name=admin
 myurl.search='name=user';
 console.log(myurl.search); // name=user
 ```
-## URLSearchParams类
+## URLSearchParams
   SearchParams的Api提供对url的?后内容进行的增删改查,也可以通过实例化URLSearchParams进行使用
 
   
