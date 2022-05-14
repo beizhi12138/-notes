@@ -277,4 +277,28 @@ setTimeout(() => {
 ```JavaScript
 console.log(process.platform);
 ```
-## release
+## send
+  用于父子进程间通信
+```JavaScript
+// index.js 父进程
+ const process=require('process');
+ const child_process=require('child_process');
+ const child=child_process.fork('./child.js');
+ //向子进程发送数据
+ child.send('data');
+ process.on('message',(data)=>{
+   console.log('父进程接收子进程的数据');
+ })
+ // child.js 子进程
+ process.on('message',data=>{
+   console.log('接收父进程数据',data);
+ })
+ process.send('向父进程发送数据');
+```
+## uptime
+ 返回当前进程运行的时间
+```JavaScript
+console.log(process.uptime());
+```
+## versions
+  返回当前node运行的版本
