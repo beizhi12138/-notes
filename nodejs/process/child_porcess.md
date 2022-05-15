@@ -1,0 +1,2 @@
+# child_process
+  child_process是用来创建子进程的,js是单线程的，所以如果我们node做服务端时遇到了高并发怎么办，就需要多进程来进行处理
