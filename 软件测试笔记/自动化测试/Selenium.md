@@ -186,16 +186,65 @@
 ### 下拉框元素
 
   #### 下拉框操作(select标签)
-    getAllSelectedoptions  获取所有的options
+    getAllSelectedoptions  获取所有选中的options
 
     getFristSelectedOption().getText()
      获取选中的元素的文本
 
+  
+  适用于多选下拉列表
+  
      deselectAll  不选择所有元素
 
      deselectByValue 不选择对应value的元素
 
      deselectByVisibleText  不选择对应text的元素
+
+### 元素进阶操作
+```java
+
+  //左击事件
+  Actions action =new Actions()
+  acrion.click(WebElement).perform()
+
+  //右击 事件
+   action.contentClick(WebElement).perform()
+  //双击事件
+    action.doubleClick(WebElement).perform()
+  //悬停事件(hover)
+     action.moveToElement(WebElement).perform()
+
+     /**
+       perform是提交
+      */
+  ```
+
+  ### 特殊窗体切换处理
+
+ ####  iframe 处理
+      switchTo
+
+      getWindowHandles
+
+
+#### 弹窗处理
+
+      switchTo
+
+      getWindowHandle  获取当前页面的窗口
+
+      getWindowHandles 获取窗口集合
+
+ ```java
+driver.switchTo.frame(By) //选择到ifrmae标签，将driver切换到iframe里的element
+
+Set<String> handels=driver.getWindowHandles();
+
+//getWindowHandles 获取所有的tab切换的窗口
+
+
+driver.switchTo.window(handel_item);//切换tab窗口
+ ```     
   ```java
 
 import org.openqa.selenium.By;
@@ -269,3 +318,45 @@ Select list=new Select(job);
 //选中元素
  list.SelectByIndex / list.SelectByValue 
   ```
+
+  ### 等待函数
+
+  #### 强制等待
+
+    Thread.sleep(2000)
+
+  #### 显式等待
+  在10秒内找元素，找不到就会报错
+   WebDriverWait wait=new WebDriverWait(driver,10);
+
+   wait.until(ExpectedConditios.preseneceOfElementLocated(By));
+  #### 隐式等待
+
+  在20秒内找元素，如果没找到会报错
+  driver.manage.timeouts.imlicitlywait(20,TimeUnit.SECONDS)  
+
+## 基础面试
+
+ 1、如何使用自动化测试工具
+
+    webpc端使用selenium 结合 xxxx左的自动化测试框架
+
+  2、使用自动化测试工具中遇见的问题
+
+       定位不到元素 原因:dom树没有被加载出来 解决方式:分析问题出现的原因，使用重试或者等待函数
+
+  3、selenium的工作原理
+
+     参考上面写的     
+          
+  4、常用的元素定位方式
+    xpath / class / id 定位
+
+   5、上传图片有几种方式
+     input的话使用sendKeys()
+
+     非input的话使用第三方工具比如:zuto it
+
+    6、如何定位动态元素
+       使用xpath  
+            
