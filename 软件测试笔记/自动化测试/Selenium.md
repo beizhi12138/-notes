@@ -356,8 +356,88 @@ Select list=new Select(job);
    5、上传图片有几种方式
      input的话使用sendKeys()
 
-     非input的话使用第三方工具比如:zuto it
+     非input的话使用第三方工具比如:auto it
 
     6、如何定位动态元素
        使用xpath  
             
+```java
+  //登录脚本
+  package mooc;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.interactions.Actions;
+
+import javax.swing.*;
+
+public class Test {
+    private static WebDriver driver;
+
+    static {
+        System.setProperty("webdriver.chrome.marionette", "D:\\learnANDstudy\\web_auto_test\\chromedriver_win32\\chromedriver.exe");
+        ChromeOptions chromeOptions = new ChromeOptions();
+        chromeOptions.addArguments("--remote-allow-origins=*");
+        driver = new ChromeDriver(chromeOptions);
+        driver.get("http://www.imooc.com");
+        driver.manage().window().maximize();
+    }
+
+    public void loginScript() throws InterruptedException {
+        WebElement login=this.find_ele("id","js-signin-btn");
+        login.isDisplayed();
+        login.click();
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        WebElement userName=this.find_ele("name","email");
+        userName.isDisplayed();
+
+        /**
+         * 进行登录操作
+         */
+        WebElement password=this.find_ele("name","password");
+        password.isDisplayed();
+        WebElement submit=this.find_ele("class","xa-login");
+        userName.sendKeys("15538528773");
+        password.sendKeys("200212aa");
+        submit.isDisplayed();
+        submit.click();
+        //登录完成之后等待3秒请求响应
+        Thread.sleep(3000);
+        WebElement header=this.find_ele("id","header-user-card");
+        Actions heade_action=new Actions(driver);
+        heade_action.moveToElement(header);
+        String login_userName=this.find_ele("class","text-ellipsis").getTagName();
+        System.out.println("登录账户为"+login_userName);
+    }
+
+    public WebElement find_ele(String by,String value){
+        if(by.equals("id")){
+            return driver.findElement(By.id(value));
+        }else if(by.equals("name")){
+            return driver.findElement(By.name(value));
+        }else if(by.equals("class")){
+            return driver.findElement(By.className(value));
+        }else{
+            return driver.findElement(By.xpath(value));
+        }
+    }
+}
+
+
+```
+
+## Testng
+  
+ ### 通过监听事件登录脚本失败，自动截图
+
+   继承testng提供的TestListenerAdapter类
+
+
+ ~~~!!!!!!!!!!!!!!!!后续会进行更新  
