@@ -334,7 +334,8 @@ Select list=new Select(job);
 
   在20秒内找元素，如果没找到会报错
   driver.manage.timeouts.imlicitlywait(20,TimeUnit.SECONDS)  
-
+### 读取配置文件进行自动化测试
+    如果想让自动化脚本进行一个通用的方式，那么就是进行读取配置文件来进行测试
 ## 基础面试
 
  1、如何使用自动化测试工具
