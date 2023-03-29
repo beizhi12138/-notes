@@ -27,3 +27,5 @@
  LoadRunner Amalysis
 
  使用图表或报告显示结果的辅助分析工具
+
+ ## LoadRunner安装
