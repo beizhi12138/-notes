@@ -48,9 +48,9 @@
  然后选择update classes and resourse
 
 ## Tomcat管理项目
-  直接输入 12.0.0.1:8080 进入管理界面
+  直接输入 127.0.0.1:8080 进入管理界面
 
-  选择mananing Tomcat
+  选择manageing Tomcat
 
   然后在Tomcat文件夹下找到tomcat-users.xml配置用户名和密码,配置完成之后，重启服务器，进行登录管理界面
 
@@ -249,8 +249,7 @@ public class Servlets extends HttpServlet {
 
 
 ####  输出响应
-res.getWriter().writer(String);
-res.close()
+res.getWriter().writer(String)
 
 ### HttpServlet
   HttpServlet是Servlet的实现类，包含doGet和doPost方法
