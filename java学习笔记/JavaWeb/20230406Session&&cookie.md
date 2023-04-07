@@ -84,3 +84,154 @@ req.getCookies();
       res.sendRedirect("index.jsp");
 
 ```
+
+### 防止用户禁用cookie
+
+ 使用res.encodeURL对跳转的连接进行编译
+
+ ```java
+ res.encodeURL("url")
+ ```
+ # 过滤器(Filter) 
+  
+  使用过滤器，需要实现Filter接口
+  过滤器主要的作用就是拦截请求，所以过滤器也可以称之为拦截器
+## 过滤器的生命周期
+
+  过滤器的生命周期和Servlet的一样
+
+   都是经过
+   init(初始化，配置参数) --- doFilter(过滤) ---- destory(对象销毁之前调用)
+
+## 过滤器实现字符集过滤
+
+```java
+package Filter;
+
+import javax.servlet.*;
+import javax.servlet.annotation.*;
+import java.io.IOException;
+
+@WebFilter(filterName = "ChatFilter")
+public class ChatFilter implements Filter {
+    private String encode="utf-8"; //默认编码
+    public void init(FilterConfig config) throws ServletException {
+      encode= config.getInitParameter("encode");
+    }
+
+    public void destroy() {
+    }
+
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws ServletException, IOException {
+    /*
+
+    * 因为不同的请求或者浏览器传输过来的数据的编码不一致，所以导致Contorller层接收到的乱码，使用过滤器重新进行编码设置
+
+    */
+//        request.setCharacterEncoding("utf-8");
+//        response.setCharacterEncoding("utf-8");
+//        response.setContentType("text/html;charset=utf-8");
+     /*
+     *  升级版，获取参数，进行设置字符集
+     * */
+        request.setCharacterEncoding(encode);
+        response.setCharacterEncoding(encode);
+        response.setContentType("text/html;charset="+encode);
+            chain.doFilter(request,response);
+
+
+
+    /**
+         * 升级版 根据请求区分字符集
+         */
+    
+HttpServletRequest req=(HttpServletRequest) request;
+        HttpServletResponse res=(HttpServletResponse) response;
+        String method=req.getMethod();
+        if("post".equalsIgnoreCase(method)){
+            req.setCharacterEncoding(this.Encode);
+            res.setCharacterEncoding(this.Encode);
+            res.setContentType("text/html;charset="+this.Encode);
+        }else{
+            MyRequest myRequest=new MyRequest(req);
+            myRequest.setEncode(this.Encode);
+            myRequest.setGetEncode(this.GetEncode);
+            req=myRequest;
+        }
+        chain.doFilter(req,res);
+    }
+}
+
+
+
+
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
+import java.io.UnsupportedEncodingException;
+import java.util.Map;
+import java.util.Set;
+
+public class MyRequest extends HttpServletRequestWrapper {
+    private HttpServletRequest request;
+    private String Encode;
+    private String GetEncode;
+    public String getEncode() {
+        return Encode;
+    }
+
+    public void setEncode(String encode) {
+        Encode = encode;
+    }
+
+    public String getGetEncode() {
+        return GetEncode;
+    }
+
+    public void setGetEncode(String getEncode) {
+        GetEncode = getEncode;
+    }
+
+
+    public MyRequest(HttpServletRequest request) {
+        super(request);
+        this.request=request;
+    }
+
+    @Override
+    public String getParameter(String name) {
+        String old_content=this.request.getParameter(name);
+        if(old_content != null){
+            try {
+                old_content=new String(old_content.getBytes(this.GetEncode),this.Encode);
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
+        return old_content;
+    }
+
+    @Override
+    public Map<String, String[]> getParameterMap() {
+       Map<String,String[]> old_content=this.request.getParameterMap();
+       if(old_content!=null){
+           Set<Map.Entry<String,String[]>> old_set=old_content.entrySet();
+           for(Map.Entry<String,String[]> items:old_set){
+               String key=items.getKey();
+               String [] values=items.getValue();
+               for(int i=0;i<values.length;i++){
+                   try {
+                       values[i]=new String(values[i].getBytes(this.GetEncode),this.Encode);
+                   } catch (UnsupportedEncodingException e) {
+                       e.printStackTrace();
+                   }
+               }
+               old_content.put(key,values);
+           }
+       }
+       return old_content;
+    }
+}
+
+```
