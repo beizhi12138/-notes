@@ -92,7 +92,7 @@ req.getCookies();
  ```java
  res.encodeURL("url")
  ```
- # 过滤器(Filter) 
+# 过滤器(Filter) 
   
   使用过滤器，需要实现Filter接口
   过滤器主要的作用就是拦截请求，所以过滤器也可以称之为拦截器
@@ -235,3 +235,70 @@ public class MyRequest extends HttpServletRequestWrapper {
 }
 
 ```
+# Listener(监听器)
+ 
+
+   使用监听器，根据不同的范围和监听事件的不同，需要实现不同的接口 
+
+ 
+ 
+ 
+  监听器主要是对ServletRequest域   HttpSession域   ServletContext域这三个范围对象的监听，
+
+   监听器又分为三类
+     
+       监听对象创建和销毁的监听器
+
+       监听对象属性变更的监听器
+
+       监听 Session 中对象状态改变的监听器
+
+## 监听创建和销毁的监听器
+  主要包含两个方法：创建和销毁的方法
+
+### session作用域的创建和销毁
+   sessionCreated (HttpSessionEvent se)
+
+   sessionDestoryed (HttpSessionEvent se)
+
+#### request作用域的创建和销毁  
+   requestInitialized (ServletRequestEvent sre)
+   requestDestroyed (ServletRequestEvent sre)
+  
+### Context作用域的创建和销毁方法
+   contextInitialized(ServletContextEvent sce)
+   contextDestroyed(ServletContextEvent sce)
+
+## 监听对象属性变更的监听器
+
+public void attributeAdded (ServletContextAttributeEvent scae) 
+
+public void attributeRemoved (ServletContextAttributeEvent scae) 
+
+public void attributeReplaced (ServletContextAttributeEvent scae) 
+
+属性变更的监听器使用的方法都是一样的，只不过是参数不一样
+
+ session 使用  HttpSessionBindingEvent
+
+ context 使用 ServletRequestAttributeEvent
+
+ request 使用 ServletContextAttributeEvent
+
+ ## 监听Session对象改变的监听器
+
+
+ ## 注册监听器
+
+  注册监听器有两种方式，一种是xml配置，一种是使用注解
+
+```xml
+  <listener>
+    <listener-class>监听器路径</listener-class>
+  </listener>
+```
+
+使用注解配置
+```java
+@WebListener
+``` 
