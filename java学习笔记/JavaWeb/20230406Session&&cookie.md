@@ -302,3 +302,119 @@ public void attributeReplaced (ServletContextAttributeEvent scae)
 ```java
 @WebListener
 ``` 
+# 上传和下载
+ 如果要实现Servlet的上传和下载的话需要导入两个包
+
+ ```xml
+  <!-- https://mvnrepository.com/artifact/commons-fileupload/commons-fileupload -->
+    <dependency>
+      <groupId>commons-fileupload</groupId>
+      <artifactId>commons-fileupload</artifactId>
+      <version>1.5</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>2.11.0</version>
+    </dependency>
+ ```
+
+ 上传和下载的工具类实现
+
+ ```java
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileUpload;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.net.URLEncoder;
+import java.util.*;
+
+public class FileUploadUtil {
+    public Map<String,Object> fileUpload(String filePath, HttpServletRequest req) {
+        //上传的话，需要返回一些内容，所以设置Map存储返回信息
+        Map<String,Object> returnInfo=new HashMap<String, Object>();
+         //创建File工厂
+        DiskFileItemFactory factory = new DiskFileItemFactory();
+        //创建上传对象
+        FileUpload fileUpload = new FileUpload(factory);
+        //这个list工厂创建的，用来将请求参数转换为list集合
+        List<FileItem> fileItemList=null;
+        //上传文件保存的名称
+        String newFileName=null;
+        //解析request
+        try {
+            //解析request将参数转换为list集合
+            fileItemList=fileUpload.parseRequest(req);
+        } catch (FileUploadException e) {
+            e.printStackTrace();
+        }
+        //遍历list集合
+        for (FileItem item:fileItemList){
+            //通过集合元素的isFormField 方法判断是否是文件
+          if(item.isFormField()){
+              try {
+                //如果不是文件，是普通参数则将普通参数存储进返回的map
+                  returnInfo.put(item.getFieldName(),item.getString("utf-8"));
+                  //getFiledName方法用来获取参数名
+                  //getString方法用来获取参数值，一定要传编码格式，如果不传编格式在工厂里的默认编码格式是iso-3288,中文会乱码
+              } catch (UnsupportedEncodingException e) {
+                  throw new RuntimeException(e);
+              }
+          }else{
+             //处理文件
+              String name=item.getName();
+              //创建保存文件的文件夹
+              File pathFile=new File(filePath+"image");
+              newFileName=new Date().getTime()+ UUID.randomUUID().toString()+name.substring(name.lastIndexOf("."));
+              //判断文件夹是否存在
+              if(!pathFile.exists()){
+                  pathFile.mkdirs();
+              }
+
+              File newFile=new File(pathFile,newFileName);
+              //将上传的数据进行写入
+              try {
+                  item.write(newFile);
+              } catch (Exception e) {
+                  e.printStackTrace();
+              }
+             returnInfo.put("fileName",newFileName);
+          }
+        }
+        return returnInfo;
+    }
+    public void down(String path, HttpServletResponse res){
+        //获取下载的文件名
+        String fileName=path.substring(path.lastIndexOf("/")+1);
+
+        try {
+            //编译文件名，(一定要进行编译文件名，因为下载的话是通过a链接进行下载，是get方式的请求，get请求的话如果有中文会乱码，所以使用URLEncoder.encode方法对参数进行编码)
+            fileName= URLEncoder.encode(fileName);
+            //设置响应头
+            res.setHeader("Content-Disposition","attachment;fileName="+fileName);
+            //创建字节输入流 (读取服务器上的文件)
+            FileInputStream in=new FileInputStream(path);
+            //获取字节输出流
+            OutputStream out =res.getOutputStream();
+            //开始读取输出
+            int len=0;
+            byte[] buf = new byte[1024];
+            while((len = in.read(buf)) != -1){
+                //写入到响应
+                out.write(buf,0,len);
+            }
+            in.close();
+            out.close();
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+}
+ ```
