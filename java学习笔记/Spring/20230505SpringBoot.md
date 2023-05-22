@@ -507,7 +507,7 @@ Actuator
 
 ## 容器功能
 
-### 组件添加
+### 组件添加(SpringBoot底层注解)
 
   在之前我们的组件添加需要，配置bean文件，但是在springBoot里我们通过@Configuration注解来配置类表示配置类来代替配置文件
 
@@ -630,34 +630,155 @@ public class Eat {
 }
 
 ```
-#### @import
+#### @Import
 
   给容器内注入组件
 
 ```java
-@Import({Eat.class,User.class})
+@Import({Eat.class})
 public class myConfig
 ```
+
+注解当使用Import导入组件时，组件内一定不要有循环依赖关系否则会导致程序崩溃。
 #### @Conditional
 
  满足Conditional指定的条件则进行组件注入。
 
 
+#### @ImportResource
 
+   配置文件导入
 
+```java
+@ImportResource("classpath:文件路径")
+```
+#### @ConfigurationProperties
+  将配置文件注入到bean
+```java
+@Configuration
+@ConfigurationProperties(prefix = "jdbc")
+// prefix表示的是前缀，注意:配置文件一定要是application.properties
+public class jdbcConfig {
+    private String driverClassName;
+    private String url;
+    private String userName;
+    private String password;
+    public jdbcConfig() {
+    }
+    @Bean
+    public DataSource getDataSource() {
+      SimpleDriverDataSource springDatasource= new SimpleDriverDataSource();
+        System.out.println(springDatasource);
+//        System.out.println(userName);
+//        System.out.println(password);
+//        System.out.println(url);
+      springDatasource.setUsername(this.userName);
+      springDatasource.setPassword(this.password);
+      springDatasource.setUrl(this.url);
+      springDatasource.setDriverClass(Driver.class);
+      return springDatasource;
+    }
+    public String getDriverClassName() {return driverClassName;}
+    public void setDriverClassName(String driverClassName) {this.driverClassName = driverClassName;}
+    public String getUrl() {return url;}
+    public void setUrl(String url) { this.url = url;}
+    public String getUserName() {return userName;}
+    public void setUserName(String userName) { this.userName = userName;}
+    public String getPassword() { return password; }
+    public void setPassword(String password) {this.password = password;}
+}
+```
+### 自动配配置原理入门
 
+#### 引导加载自动配置类
 
+```java
+@SpringBootConfiguration
+@EnableAutoConfiguration
+@ComponentScan(
+    excludeFilters = {@Filter(
+    type = FilterType.CUSTOM,
+    classes = {TypeExcludeFilter.class}
+), @Filter(
+    type = FilterType.CUSTOM,
+    classes = {AutoConfigurationExcludeFilter.class}
+)}
+)
+public @interface SpringBootApplication 
+```
+SpringBootApplication注解是SpringBootConfiguration
+EnableAutoConfiguration
+ComponentScan
 
+三个注解的合成注解
 
+##### @SpringBootApplication注解
+首先我们来看SpringBootConfiguration注解的源码
 
+```java
+@Configuration
+@Indexed
+public @interface SpringBootConfiguration 
+```
+可以发现它就是一个Configuration注解的类 
+##### @ComponentScan
 
+ 指定扫描哪些包
 
+##### @EnableAutoConfiguration
 
+```java
 
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Inherited
+@AutoConfigurationPackage
+@Import({AutoConfigurationImportSelector.class})
+public @interface EnableAutoConfiguration
+```
 
+   可以看到EnableAutoConfiguration注解里核心的注解就是AutoConfigurationPackage
+   我们来看看这个的代码，这个注解翻译过来就是自动导入包
 
-
+```java
+@Import({AutoConfigurationPackages.Registrar.class})
+public @interface AutoConfigurationPackage {
+```
  ## SpringBoot部分底层自动配置DEMO
 
+```java
 
+    //第一种配置方式,属性注入配置
+   /* @Autowired
+    private JdbcProperties jdbcProperties;*/
+
+
+    //第二种配置方式,构造函数注入配置
+    /*private JdbcProperties jdbcProperties;
+    public BootJdbcConfig(JdbcProperties jdbcProperties){
+        this.jdbcProperties = jdbcProperties;
+    }*/
+
+
+    // //第三种配置方式,通过有bean注解的方法形参注入配置
+  /*  @Bean
+    public DataSource getDataSource(JdbcProperties jdbcProperties){
+        DruidDataSource druidDataSource = new DruidDataSource();
+        druidDataSource.setDriverClassName(jdbcProperties.getDriverClassName());
+        druidDataSource.setPassword(jdbcProperties.getPassword());
+        druidDataSource.setUsername(jdbcProperties.getUsername());
+        druidDataSource.setUrl(jdbcProperties.getUrl());
+        return druidDataSource;
+    }*/
+
+    // //第四种配置方式,通过有bean注解的方法加上ConfigurationProperties注解 注入配置
+   /* @Bean
+    @ConfigurationProperties(prefix = "jdbc")
+    public DataSource getDataSource(){
+        DruidDataSource druidDataSource = new DruidDataSource();
+        return druidDataSource;
+    }*/
+
+```
  ## mybits-plus
