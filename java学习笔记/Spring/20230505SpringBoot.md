@@ -572,7 +572,6 @@ public class myConfig {
 }
 
 // User
-package org.example.Entity;
 
 public class User {
     private String name;
@@ -631,3 +630,34 @@ public class Eat {
 }
 
 ```
+#### @import
+
+  给容器内注入组件
+
+```java
+@Import({Eat.class,User.class})
+public class myConfig
+```
+#### @Conditional
+
+ 满足Conditional指定的条件则进行组件注入。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ ## SpringBoot部分底层自动配置DEMO
+
+
+ ## mybits-plus
