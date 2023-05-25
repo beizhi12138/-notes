@@ -727,6 +727,8 @@ public @interface SpringBootConfiguration
 
 ##### @EnableAutoConfiguration
 
+  自动配置类
+
 ```java
 
 @Target({ElementType.TYPE})
@@ -781,4 +783,68 @@ public @interface AutoConfigurationPackage {
     }*/
 
 ```
- ## mybits-plus
+## 整合SpringMvc
+
+### 修改端口号
+  在配置文件里进行修改
+
+  server.port
+
+```java
+// yml文件
+server:
+  port:80
+// properties文件
+server.port=80
+```
+### 访问静态资源
+
+  SpringBoot提供了ResourceProperties类指定静态资源放到哪个位置。
+
+  默认的资源路径为classpath:static
+### 拦截器
+
+   SpringBoot实现拦截器同样需要实现HandlerInterceptor接口
+
+   并且将该类交给Spring管理，添加Componect注解
+
+   使用SpringBoot之后就没有配置文件了，所以我们需要去手动的告诉mvc添加该拦截器,有以下几种方式
+   
+
+    
+   #### 配置类
+
+     给配置类添加上Configuration注解，注意不要添加EnableWebMvc注解。如果加了EnableWebMvc注解则表示自定义SpringMvc配置。
+
+     配置类需要实现WebMvcConfiguer接口
+
+     重载该接口的addInterceptors方法。
+
+     将自己的拦截器注入到当前配置类中
+
+  ```java
+  @Configuration
+public class InceptorConfig implements WebMvcConfigurer {
+    @Resource
+    private TestInceptor testInceptor;
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(testInceptor).addPathPatterns("/**");
+        WebMvcConfigurer.super.addInterceptors(registry);
+    }
+}
+
+  ```
+
+   #### Thymeleaf模板引擎
+
+     Thymeleaf是一个跟velocity,FreeMarker类似的模板引擎，它可以完全替代jsp。相较于其他的搜索引擎它有以下几个特点
+
+     动静结合:Thymeleaf在有网络无网络的环境修啊都可以运行
+
+     开箱即用:
+     多方言支持
+
+     和SpringBoot完美整合 
+
+## mybits-plus
