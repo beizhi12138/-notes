@@ -356,8 +356,289 @@ public class Main {
 
 ```java
 //生产者
+@SpringBootApplication
+public class Main {
+    private static final String EXCHANGE_NAME="nwl_exchange";
+    private static final String QUEUE_KEY_SUCCESS="nwl_queue_success";
+    private static final String QUEUE_KEY_ERROR="nwl_queue_error";
+    public static void main(String[] args) throws IOException, TimeoutException {
+        SpringApplication.run(Main.class, args);
 
+        System.out.println("我是路由模式的消费者");
+        //创建连接工厂
+        ConnectionFactory factory=new ConnectionFactory();
+        factory.setHost("localhost");
+        factory.setPort(5672);
+        factory.setUsername("guest");
+        factory.setPassword("guest");
+        //创建连接
+        Connection connection = factory.newConnection();
+        //创建通道
+        Channel channel = connection.createChannel();
+        //声明交换机
+        channel.exchangeDeclare(EXCHANGE_NAME, "direct");
+        //发送消息
+        String messageSuccess="我是key成功的消息";
+        channel.basicPublish(EXCHANGE_NAME,QUEUE_KEY_SUCCESS,null,messageSuccess.getBytes("UTF-8"));
+        System.out.println("成功发送key为success的消息");
+        String messageError="我是key失败的消息";
+        channel.basicPublish(EXCHANGE_NAME,QUEUE_KEY_ERROR,null,messageError.getBytes("UTF-8"));
+        System.out.println("成功发送key为error的消息");
+        String messageErrorTwos="我是key失败的消息2";
+        channel.basicPublish(EXCHANGE_NAME,QUEUE_KEY_ERROR,null,messageErrorTwos.getBytes("UTF-8"));
+        System.out.println("成功发送key为error的消息");
+    }
+}
 //消费者1
-
+@SpringBootApplication
+public class Main {
+    private static final String EXCHANGE_NAME="nwl_exchange";
+    private static final String QUEUE_KEY_SUCCESS="nwl_queue_success";
+    private static final String QUEUE_KEY_ERROR="nwl_queue_error";
+    private static final String QUEUE_NAME="nwl_queue";
+    public static void main(String[] args) throws IOException, TimeoutException {
+        SpringApplication.run(Main.class, args);
+        System.out.println("我是路由模式的消费者1");
+        //创建连接工厂
+        ConnectionFactory factory=new ConnectionFactory();
+        //创建连接
+        Connection connection = factory.newConnection();
+        //创建通道
+        Channel channel = connection.createChannel();
+        //声明交换机
+        channel.exchangeDeclare(EXCHANGE_NAME, "direct");
+        //声明队列
+        channel.queueDeclare(QUEUE_NAME, true,false,false,null );
+        //绑定交换机与队列(这里有两个key所以绑定两次)
+        channel.queueBind(QUEUE_NAME,EXCHANGE_NAME,QUEUE_KEY_SUCCESS);
+        channel.queueBind(QUEUE_NAME,EXCHANGE_NAME,QUEUE_KEY_ERROR);
+       //接收到消息的回调
+        DeliverCallback deliverCallback=(tag,delivery)->{
+            String message=new String(delivery.getBody(),"UTF-8");
+            System.out.println("我是消费者1我接受到了消息"+message);
+        };
+        //监听消息
+        channel.basicConsume(QUEUE_NAME,true, deliverCallback, consumerTag -> {});
+    }
+}
 //消费者2
+@SpringBootApplication
+public class Main {
+    private static final String EXCHANGE_NAME="nwl_exchange";
+    private static final String QUEUE_KEY_ERROR="nwl_queue_error";
+    private static final String QUEUE_NAME="nwl_queue";
+    public static void main(String[] args) throws IOException, TimeoutException {
+        SpringApplication.run(Main.class, args);
+        System.out.println("我是路由模式的消费者2");
+        //创建连接工厂
+        ConnectionFactory factory=new ConnectionFactory();
+        //创建连接
+        Connection connection = factory.newConnection();
+        //创建通道
+        Channel channel = connection.createChannel();
+        //声明交换机
+        channel.exchangeDeclare(EXCHANGE_NAME, "direct");
+        //声明队列
+        channel.queueDeclare(QUEUE_NAME, true,false,false,null );
+        //绑定交换机与队列(这里有两个key所以绑定两次)
+        channel.queueBind(QUEUE_NAME,EXCHANGE_NAME,QUEUE_KEY_ERROR);
+        //接收到消息的回调
+        DeliverCallback deliverCallback=(tag, delivery)->{
+            String message=new String(delivery.getBody(),"UTF-8");
+            System.out.println("我是消费者2我接受到了消息"+message);
+        };
+        //监听消息
+      channel.basicConsume(QUEUE_NAME,true, deliverCallback, consumerTag -> {});
+    }
+}
 ```
+## 通配符模式(Topic)
+
+  对于通配符模式，路由key是可以不固定的。
+
+## RPC模式
+
+
+## rabbitMQ整合SpringBoot
+
+首先创建一个springBoot项目，然后开始配置文件
+
+```
+server:
+  port: 8096
+spring:
+  application:
+    name: springboot_rabbitmq_producer
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
+    password: guest
+    username: guest
+    <!-- 这里tabbit的配置有默认的，但是实际项目中可能会有所改变，所以还是手动配置的好 -->
+```
+
+接下来开始添加依赖
+
+```xml
+ <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.0.6</version>
+    </parent>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-logging</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+```
+
+接下来开始搭建我们的生产者配置类
+```java
+@Configuration
+public class RabbitMqConfig {
+    //交换机名称
+    public final static String EXCHANGE_NAME="boot_change";
+    //声明交换机
+    @Bean
+    public Exchange getExchange() {
+        return ExchangeBuilder.directExchange(EXCHANGE_NAME).durable(true).build();
+    }
+}
+```
+然后我们开始测试发送消息
+```java
+@SpringBootTest
+@RunWith(SpringRunner.class)
+public class TestSend {
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+    @Test
+    public void send(){
+        rabbitTemplate.convertAndSend(RabbitMqConfig.EXCHANGE_NAME,"Success","我是生产者发送的success消息,应该被队列1接收".getBytes());
+        rabbitTemplate.convertAndSend(RabbitMqConfig.EXCHANGE_NAME,"Error","我是生产者发送的success消息,应该被队列1接收".getBytes());
+        System.out.println("已经发送了消息");
+    }
+}
+```
+
+接下来开始写我们的消费者配置类
+```java
+@Configuration
+public class RabbitMqConfig {
+
+    //交换机名称
+    private final static String EXCHANGE_NAME="boot_change";
+    //队列1名称
+    private final static String QUEUE_NAME="boot_queue";
+    //队列2名称
+    private final static String QUEUE_NAME_TWOS="boot_queue2";
+    //队列1的key
+    private final static String QUEUE_KEY="Success";
+    //队列2的key
+    private final static String QUEUE_KEY_TWOS="Error";
+    @Bean("exchange")
+    //声明交换机
+    public Exchange createExchange(){
+        /**
+         * 
+         * 这里的directEchange方法，是创建交换机的方法
+         * 
+         * ExchangeBuilder给我们提供了很多的创建交换机的方法
+         * 
+         * 前边的direct 是模式
+         */
+        return ExchangeBuilder.directExchange(EXCHANGE_NAME).durable(true).build();
+    }
+    //声明队列
+    @Bean("queue")
+    public Queue createQueue(){
+        return new Queue(QUEUE_NAME, true,false,false);
+    }
+    //声明队列
+    @Bean("queue2")
+    public Queue createQueue2(){
+        return new Queue(QUEUE_NAME_TWOS, true,false,false);
+    }
+
+    //绑定交换机 队列1与交换机 队列1的名称是"boot_queue"，队列1的key是Success
+    @Bean
+    public Binding bind_one(@Qualifier("exchange") Exchange exchange, @Qualifier("queue") Queue queue){
+        System.out.println("开始");
+        return BindingBuilder.bind(queue).to(exchange).with(QUEUE_KEY).noargs();
+    }
+    //绑定交换机，队列2与交换机 队列2的名称是"boot_queue2"，队列1的key是Error
+    @Bean
+    public Binding bind_twos(@Qualifier("exchange") Exchange exchange, @Qualifier("queue2") Queue queue){
+        return BindingBuilder.bind(queue).to(exchange).with(QUEUE_KEY_TWOS).noargs();
+    }
+}
+
+```
+
+接下来是我们的监听消息类
+```java
+@Component
+public class Mq {
+    @RabbitListener(queues="boot_queue")
+    public void getInfo(String message){
+        System.out.println(message);
+    }
+    @RabbitListener(queues="boot_queue2")
+    public void getInfo2(String message){
+        System.out.println(message);
+    }
+}
+```
+
+到这里我们的SpringBoot整合RabbitMq就完成了。
+
+
+## Rabbit常见面试题(面试题后续会进行更新)
+
+### 解耦  异步 削峰
+
+#### 解耦
+
+ 解耦就是，在不同的服务之间增加消息队列，其他的系统值需要监听这个队列进行操作即可。
+
+ #### 异步
+   消息队列的主要特点是一步处理，主要目的是减少请求时间，实现非核心流程异步化。
+
+     就是这样的场景:
+         一个电商网站，当用户下单之后:需要立即返回订单的状态，但是这对于电商的后台管理来说，需要去减少库存，需要去增加订单。那么这是就可以发送消息队列，一个服务去减少库存，一个服务去增加订单。
+
+#### 削峰
+  流量削峰，是消息队列中常见的应用场景，一般在秒杀或者团购。
+
+  比如秒杀活动，流量暴增应用挂掉，为了解决这个问题要在应用前端加入消息队列。
+
+  削峰实际上就是，将所有的请求先存入消息队列，然后让系统慢慢的处理请求。
+
+### 缺点
+
+系统可用性降低，在系统中加入消息队列，万一消息队列挂了那么系统也就挂了。
+
+系统复杂度提高:加入消息队列之后要保证消息不重复，消息不丢失
+
