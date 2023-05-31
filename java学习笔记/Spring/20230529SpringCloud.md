@@ -271,7 +271,6 @@ eureka:
   由于Eureka已经整合进了ribbon所以我们不需要再添加依赖了
 
    ribbon的负载均衡值需要在resttemplate加上LoabBlance注解就可以了
-
 ```java
    @Bean
     @LoadBalanced //开启负载均衡
@@ -296,8 +295,376 @@ eureka:
 
 
 ## Openfeign
+  远程调用工具
 
-# 以下是alibaba公司的组件
+## Nacos(阿里开源组件)
+macos是阿里的一个开源产品，针对微服务架构中的服务发现，配置管理，服务治理的综合性解决方案。
+nacos不仅可以做注册中心，还可以做配置中心
+### 注册中心
+
+服务的注册与发现，服务的健康状态管理
+
+使用注册中心的话，需要下载注册中心压缩包
+
+<a href="https://github.com/alibaba/nacos/releases">注册中心压缩包</a>
+
+下载完成之后进行解压，解压完成进入到bin目录双击startup.cmd然后通过终端提供给我们的地址可以访问注册中心图形化界面
+
+
+#### 注册中心服务注册与消费
+首先我们进行导入依赖
+```xml
+ <properties>
+        <maven.compiler.source>18</maven.compiler.source>
+        <maven.compiler.target>18</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <spring-cloud.version>2022.0.1</spring-cloud.version>
+        <spring-boot.version>3.0.6</spring-boot.version>
+        <project.versions>2022.0.0.0-RC1</project.versions>
+    </properties>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.0.6</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+    <dependencies>
+    <!-- springboot 依赖 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <!-- cloud nacos -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+        <!-- loadbalancer 负载均衡组件，springBoot3一定要单独引入
+        
+            因为在新版本中，已经不再使用ribbon了
+           -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+        </dependency>
+    </dependencies>
+    <dependencyManagement>
+        <dependencies>
+            <!--            springcloud-->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!--            alibaba  cloud-->
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-alibaba-dependencies</artifactId>
+                <version>${project.versions}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!--            springBoot-->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+```
+然后我们开始写服务提供者代码
+```java
+//main
+@SpringBootApplication
+@EnableDiscoveryClient
+public class Main {
+    public static void main(String[] args) {
+        SpringApplication.run(Main.class,args);
+    }
+}
+//controller
+@RestController
+public class Order {
+    @GetMapping ("/order/{id}")
+    public String order(@PathVariable("id") int id) {
+        return "订单id是"+id;
+    }
+}
+```
+接下来是配置文件
+
+```
+spring:
+  application:
+    name: provider
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+server:
+  port: 8091
+```
+
+然后开始写消费者
+
+```java
+//mian
+@SpringBootApplication
+@EnableDiscoveryClient
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Hello world!");
+        SpringApplication.run(Main.class, args);
+    }
+    @Bean
+    public RestTemplate getRestTemplate(){
+        return new RestTemplate();
+    }
+}
+//controller
+@RestController
+public class User {
+    @Autowired
+    private RestTemplate restTemplate;
+    @Autowired
+    private LoadBalancerClient loadBalancerClient;
+    @GetMapping("/user/{id}")
+public String user(@PathVariable int id){
+        ServiceInstance provider = loadBalancerClient.choose("provider");
+        String host=provider.getHost();
+        int port=provider.getPort();
+        System.out.println(host + ":"+port);
+        System.out.println("http://"+host+":"+port+"/order/"+id);
+       String orderId= restTemplate.getForObject("http://"+host+":"+port+"/order/"+id,String.class);
+        return "用户id是"+id+"订单id是"+orderId;
+}
+}
+```
+配置文件
+```
+server:
+  port: 8082
+spring:
+  application:
+    name: consumer
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+```
+### Dubbo
+
+Apache Dubbo是一款高性能的JAVA rpc框架，可以和Spring无缝集成
+
+Rpc就是远程过程调用手段。
+
+一般我们在浏览器访问的后端接口是通过http协议(七层)，dubbo如果不进行配置的话默认使用dubbo协议。
+dubbo协议相对于http协议的话要快。但是浏览器与后端交互又只能使用http协议，虽然改变不了，但是可以改变微服务之间的调用，微服务之间如果使用http协议进行调用的话速度稍慢，但是如果微服务之间使用dubbo协议调用会快。
+
+- 使用dubbo之后的微服务架构是这样的:浏览器进行访问后端使用http协议，后端之间的服务调用通过dubbo协议。
+
+  对于dubbo的服务提供者进行分包编写，一个包提供接口，一个包进行实现。消费者调用时只需要调用接口即可。
+
+#### Dubbo搭建微服务架构
+
+  这个Demo使用两个服务提供者，一个服务消费者，来进行搭建。
+
+  首先是添加依赖(依赖在前边已经有，这里就不放了)
+
+ - service1代码
+    api包(因为api包只写接口，所以并不需要任何配置和启动类)
+```java
+//api接口
+public interface Order {
+    String changeOrder(String name);
+}
+```
+   server包
+```java
+
+//mian
+@SpringBootApplication
+public class Main {
+
+    public static void main(String[] args) {
+        System.out.println("我是dubbo的service1的server");
+        SpringApplication.run(Main.class,args);
+    }
+}
+/***
+ * 
+ * 实现该接口时，一定要在maven依赖里依赖该api接口的包
+ */
+//实现类
+@DubboService
+public class OrderImpl implements Order{
+    @DubboReference
+    private Goods goods;
+    @Override
+    public String changeOrder(String name) {
+        //这里调用了另外一个微服务
+      String goodsName=goods.changeGoods("李靖");
+        return "订单名称是"+name+goodsName;
+    }
+}
+```
+配置
+```
+server:
+  port: 8011
+spring:
+  application:
+    name: dubbo_service1
+#    服务的注册中心
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+dubbo:
+  scan:
+#    扫描包
+    base-packages: org.example.service
+  protocol:
+#    使用协议名称
+    name: dubbo
+#    dubbo协议端口
+    port: 10191
+  registry:
+#    注册中心地址
+    address: nacos://127.0.0.1:8848
+  application:
+#    运维服务是否开启
+    qos-enable: false
+  consumer:
+#    是否启动检查时依赖
+    check: false
+
+```
+ - service2代码
+api包
+```java
+public interface Goods {
+  String changeGoods(String name);
+}
+```
+server包
+```java
+//main
+@SpringBootApplication
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("我是dubbo2的server");
+        SpringApplication.run(Main.class, args);
+    }
+}
+//实现类
+@DubboService
+public class GoodsImpl implements Goods{
+    @Override
+    public String changeGoods(String name) {
+        return "商品的名称是"+name;
+    }
+}
+
+```
+配置文件
+```
+server:
+  port: 8016
+spring:
+  application:
+    name: dubbo_service3
+  #    服务的注册中心
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+dubbo:
+  scan:
+    #    扫描包
+    base-packages: com.lrz.service
+  protocol:
+    #    使用协议名称
+    name: dubbo
+    #    dubbo协议端口
+    port: 10196
+  registry:
+    #    注册中心地址
+    address: nacos://127.0.0.1:8848
+  application:
+    #    运维服务是否开启
+    qos-enable: false
+  consumer:
+    #    是否启动检查时依赖
+    check: false
+
+```
+
+ - consumer代码
+```java
+//main
+@SpringBootApplication
+public class Main {
+    public static void main(String[] args) {
+
+        System.out.println("我是dubbo的消费者");
+        SpringApplication.run(Main.class, args);
+    }
+}
+//controller
+@RestController
+public class Tb {
+    @DubboReference
+    private Order order;
+    @DubboReference
+    private Goods goods;
+    @GetMapping("/oders")
+    public String getOrders(){
+           return order.changeOrder("订单一号");
+    }
+    @GetMapping("/goods")
+    public String getGoods(){
+        return goods.changeGoods("商品一号");
+    }
+}
+```
+配置文件
+```
+spring:
+  application:
+    name: dubbo_consumer
+server:
+  port: 8888
+  # 这里虽然是消费者，但是也要配置dubbo
+dubbo:
+    scan:
+      #    扫描包
+      base-packages: org.example.controller
+    protocol:
+      #    使用协议名称
+      name: dubbo
+      #    dubbo协议端口
+      port: 10198
+    registry:
+      #    注册中心地址
+      address: nacos://127.0.0.1:8848
+    application:
+      #    运维服务是否开启
+      qos-enable: false
+    consumer:
+      #    是否启动检查时依赖
+      check: false
+
+```
 ## SpringCloud常见面试题
 ### 什么是SpringCloud
 ### 什么是微服务
