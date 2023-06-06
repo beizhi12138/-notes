@@ -665,6 +665,145 @@ dubbo:
       check: false
 
 ```
+
+### 配置中心
+
+应用程序在启动和运行的时候往往需要一些配置信息，配置基本上伴随着App的声明周期:例如数据库参数。
+#### SDK拉取配置
+#### 主配置
+
+#### 扩展配置
+
+## Zuul网关(zuul对于springBoot3.0已经不支持，springcloud2021以后的版本都不支持)
+Zuul是Netfix开源的微服务网关，它可以和Eureka，Hystrix,Ribon等组件配合使用。
+
+Zuul的核心是一些系列的过滤器。这些过滤器可以完成以下功能。
+
+          身份认证与安全：识别每个资源的验证要求，拒绝与要求不符的请求。
+          审查与监控：在边缘位置追踪有意义的数据和统计结果
+          动态路由:动态的将请求路由到不同的后端集群。
+          压力测试:逐渐增加指向集群的流量，以了解性能
+          负载分配:为每一种负载类型分配对应容量，并启用超出限定值的请求
+          静态响应处理:在边缘位置直接建立部分响应，从而避免其转发到内部集群。
+          多区域弹性:跨越AWS Region进行请求路由。
+
+    由于zuull网关已经停更，所以这里只做一个小Demo
+
+首先是添加依赖
+
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.example</groupId>
+    <artifactId>study_0601_zull</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <modules>
+        <module>controller</module>
+        <module>zuul</module>
+    </modules>
+
+    <properties>
+        <maven.compiler.source>18</maven.compiler.source>
+        <maven.compiler.target>18</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.1.3.RELEASE</version>
+    </parent>
+   <dependencies>
+
+       <dependency>
+           <groupId>org.springframework.cloud</groupId>
+           <artifactId>spring-cloud-starter-netflix-zuul</artifactId>
+       </dependency>
+       <dependency>
+           <groupId>org.springframework.boot</groupId>
+           <artifactId>spring-boot-starter-web</artifactId>
+       </dependency>
+
+   </dependencies>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>2.1.3.RELEASE</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>Greenwich.RELEASE</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>
+```
+然后开始写服务
+
+```java
+//main
+@SpringBootApplication
+public class Main {
+    public static void main(String[] args) {
+        SpringApplication.run(Main.class, args);System.out.println("Hello world!");
+    }
+}
+//controller
+@RestController
+public class User {
+    @GetMapping("/user")
+    public String user(){
+        return "我是用户服务";
+    }
+}
+```
+配置文件
+```
+server:
+  port: 8081
+spring:
+  application:
+    name: controller
+```
+然后是zull网关
+
+```java
+//main
+@SpringBootApplication
+@EnableZuulProxy
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Hello world!");
+        SpringApplication.run(Main.class, args);
+    }
+}
+
+```
+配置文件
+```
+server:
+  port: 18888 #服务端口
+spring:
+  application:
+    name: zull-boot #指定服务名
+zuul:
+  routes:
+    service-provider: # 这里是路由id，随意写
+      path: /controller/** # 这里是映射路径
+      url: http://127.0.0.1:8081 # 映射路径对应的实际url地址
+```
+## gateway网关
 ## SpringCloud常见面试题
 ### 什么是SpringCloud
 ### 什么是微服务
